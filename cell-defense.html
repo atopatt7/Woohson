@@ -20,7 +20,7 @@ background:linear-gradient(180deg,rgba(0,0,0,0.82)0%,transparent 100%);}
 .stat{display:flex;flex-direction:column;align-items:center;}
 .slabel{font-size:7px;color:#334455;letter-spacing:1px;}
 .sval{font-size:14px;font-weight:700;color:#e8f4ff;text-shadow:0 0 8px currentColor;min-width:40px;text-align:center;}
-#hpBar{position:absolute;top:46px;left:14px;right:14px;height:4px;
+#hpBar{display:none !important;position:absolute;top:46px;left:14px;right:14px;height:4px;
 background:rgba(255,255,255,0.07);border-radius:3px;overflow:hidden;pointer-events:none;z-index:10;}
 #hpFill{height:100%;background:#00ff88;box-shadow:0 0 8px #00ff88;transition:width .2s,background .3s;border-radius:3px;}
 
@@ -40,7 +40,7 @@ padding:5px 10px;cursor:pointer;border-radius:4px;transition:all .15s;
 .spd-btn.active,.spd-btn:hover{background:rgba(0,212,255,0.25);border-color:#00d4ff;}
 
 /* stat panel bottom-left */
-#statPanel{position:absolute;bottom:10px;left:10px;font-size:9px;color:#334466;
+#statPanel{display:none !important;position:absolute;bottom:10px;left:10px;font-size:9px;color:#334466;
 line-height:1.8;pointer-events:none;z-index:10;letter-spacing:1px;}
 #statPanel span{color:#00aacc;}
 
@@ -135,13 +135,30 @@ transition:all .2s;-webkit-tap-highlight-color:transparent;}
     骨頭：<span id="stBullet">1</span> &nbsp;連發：<span id="stBurst">1</span><br>
     傷害：<span id="stDmg">22</span> &nbsp;撒尿：<span id="stLaser">無</span><br>
     嘔吐：<span id="stFire">無</span> &nbsp;分裂：<span id="stSplit">無</span><br>
-    大骨頭：<span id="stBig">無</span><br>
-    拉翔：<span id="stCrit">無</span> &nbsp;拉翔：<span id="stCrit">無</span><br>
-    拉翔：<span id="stCrit">無</span>
+    大骨頭：<span id="stBig">無</span> &nbsp;拉翔：<span id="stCrit">無</span>
   </div>
 </div>
 
 <button id="pauseBtn" onclick="togglePause()">⏸ PAUSE</button>
+
+<div id="pauseModal" style="display:none;position:fixed;inset:0;background:rgba(5,10,20,0.92);z-index:300;display:none;flex-direction:column;align-items:center;justify-content:center;backdrop-filter:blur(8px);">
+  <div style="background:#0a1828;border:2px solid #00d4ff;border-radius:16px;padding:28px 36px;min-width:260px;color:#cce8ff;font-size:13px;line-height:2;">
+    <div style="font-size:16px;color:#00d4ff;text-align:center;margin-bottom:14px;letter-spacing:2px;">⚔️ 武雄裝備欄</div>
+    <table style="width:100%;border-collapse:collapse;">
+      <tr><td style="color:#446688;">骨頭數量</td><td id="ps_bullet" style="color:#00f2ff;text-align:right;">1</td></tr>
+      <tr><td style="color:#446688;">連發次數</td><td id="ps_burst" style="color:#00f2ff;text-align:right;">1</td></tr>
+      <tr><td style="color:#446688;">骨頭傷害</td><td id="ps_dmg" style="color:#00f2ff;text-align:right;">22</td></tr>
+      <tr><td style="color:#446688;">分裂骨頭</td><td id="ps_split" style="color:#00f2ff;text-align:right;">無</td></tr>
+      <tr><td style="color:#446688;">拉翔機率</td><td id="ps_crit" style="color:#ff6644;text-align:right;">無</td></tr>
+      <tr><td style="color:#446688;">憋一波大的</td><td id="ps_big" style="color:#ffcc00;text-align:right;">無</td></tr>
+      <tr><td style="color:#446688;">黃狗撒尿</td><td id="ps_laser" style="color:#ffee44;text-align:right;">無</td></tr>
+      <tr><td style="color:#446688;">嘔吐攻擊</td><td id="ps_fire" style="color:#44cc00;text-align:right;">無</td></tr>
+    </table>
+    <div style="text-align:center;margin-top:18px;">
+      <button onclick="togglePause()" style="background:transparent;border:2px solid #00d4ff;color:#00d4ff;padding:10px 32px;border-radius:20px;font-family:'Orbitron';cursor:pointer;font-size:14px;">▶ 繼續</button>
+    </div>
+  </div>
+</div>
 
 <div id="dogDeath">
   <div id="dogTitle">💀 武雄陣亡了！</div>
@@ -422,7 +439,6 @@ function resetG(){
     touchX: null,   // for mobile drag
     frame:0,
     _bigBoneThisWave:false,
-    _boneSfxThisWave:false,
   };
 }
 
@@ -689,7 +705,7 @@ function processBurst(){
   p.burstQueue--;
   p.burstTimer=p.burstDelay;
   // Reset wave flag when burst queue finishes
-  if(p.burstQueue===0){ G._bigBoneThisWave=false; G._boneSfxThisWave=false; }
+  if(p.burstQueue===0){ G._bigBoneThisWave=false; }
 }
 
 // ─── BIG BONE UPDATE ───
@@ -790,7 +806,7 @@ function playBoneSfx(){
     const ac = getAC();
     if(ac.state==='suspended') return;
     const now = ac.currentTime;
-    if(now - (ac._lastBone||0) < 0.5) return;
+    if(now - (ac._lastBone||0) < 0.2) return;
     ac._lastBone = now;
     const osc = ac.createOscillator();
     osc.type = 'sine';
@@ -1208,7 +1224,7 @@ function update(){
         seg.hp-=hitDmg;
         seg.flickerT=6;
         addFloat(pos.x,pos.y-SEG_R, b.isCrit?`💩${hitDmg}`:`${hitDmg}`, b.isCrit?'#ffcc00':'#ffffff');
-        if(!G._boneSfxThisWave){ G._boneSfxThisWave=true; playBoneSfx(); }
+        playBoneSfx();
         if(seg.hp<=0){
           G.kills++;
           G.score+=Math.floor(si/5)+1;
@@ -1379,10 +1395,35 @@ function draw(){
 }
 
 // ─── GAME CONTROL ───
+function updatePauseModal(){
+  const p = G.player;
+  document.getElementById('ps_bullet').textContent = p.bulletCount;
+  document.getElementById('ps_burst').textContent = p.burstCount;
+  document.getElementById('ps_dmg').textContent = Math.round(p.bulletDmg);
+  document.getElementById('ps_split').textContent = p.splitLevel>0 ? 'ON' : '無';
+  document.getElementById('ps_crit').textContent = p.critLevel>0 ? Math.round(p.critChance*100)+'%' : '無';
+  document.getElementById('ps_big').textContent = p.bigBoneLevel>0 ? `ON ×${p.bigBoneDmgMult.toFixed(2)}` : '無';
+  const laserEl = document.getElementById('ps_laser');
+  if(p.laserLevel>0){
+    laserEl.textContent = `${Math.round(p.laserDmgBase*p.laserDmgMult)}/s × ${p.laserDur}s`;
+  } else laserEl.textContent = '無';
+  const fireEl = document.getElementById('ps_fire');
+  if(p.fireLevel>0){
+    fireEl.textContent = `${Math.round(20*p.fireDmgMult)}/s`;
+  } else fireEl.textContent = '無';
+}
 function togglePause(){
   if(!G.running && !G.paused) return;
   G.paused = !G.paused;
-  document.getElementById('pauseBtn').textContent = G.paused ? '▶ RESUME' : '⏸ PAUSE';
+  const modal = document.getElementById('pauseModal');
+  if(G.paused){
+    updatePauseModal();
+    modal.style.display='flex';
+    document.getElementById('pauseBtn').textContent='▶ RESUME';
+  } else {
+    modal.style.display='none';
+    document.getElementById('pauseBtn').textContent='⏸ PAUSE';
+  }
 }
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'||e.key==='p'||e.key==='P') togglePause();
