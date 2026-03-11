@@ -422,6 +422,7 @@ function resetG(){
     touchX: null,   // for mobile drag
     frame:0,
     _bigBoneThisWave:false,
+    _boneSfxThisWave:false,
   };
 }
 
@@ -458,7 +459,7 @@ function buildUpgradePool(){
   if(p.laserLevel === 0){
     pool.push({
       id:'laser', icon:'💛', name:'黃狗撒尿',
-      desc:'每 20 秒撒一泡尿\n每秒 20 傷害，持續 1 秒',
+      desc:`每 20 秒撒一泡尿\n每秒 ${Math.round(p.laserDmgBase*p.laserDmgMult)} 傷害，持續 ${p.laserDur} 秒`,
       cls:'laser-card',
       ap: ()=>{ p.laserLevel=1; p.laserTimer=p.laserCooldown*60; document.getElementById('laserBar').style.display='block'; }
     });
@@ -641,7 +642,9 @@ function spawnParts(x,y,color,n){
   }
 }
 function addFloat(x,y,txt,col){
-  G.floatTexts.push({x,y,txt,col,life:45,vy:-1.5});
+  // Cap float texts to avoid clutter
+  if(G.floatTexts.length>30) G.floatTexts.splice(0, G.floatTexts.length-30);
+  G.floatTexts.push({x,y,txt,col,life:30,vy:-1.2});
 }
 
 // ─── SHOOT ───
@@ -649,7 +652,6 @@ function triggerShoot(){
   if(G.player.burstQueue>0) return;
   G.player.burstQueue=G.player.burstCount;
   G.player.burstTimer=0;
-  playBoneSfx(); // 每波只播一次
 }
 
 function processBurst(){
@@ -687,7 +689,7 @@ function processBurst(){
   p.burstQueue--;
   p.burstTimer=p.burstDelay;
   // Reset wave flag when burst queue finishes
-  if(p.burstQueue===0) G._bigBoneThisWave=false;
+  if(p.burstQueue===0){ G._bigBoneThisWave=false; G._boneSfxThisWave=false; }
 }
 
 // ─── BIG BONE UPDATE ───
@@ -1206,6 +1208,7 @@ function update(){
         seg.hp-=hitDmg;
         seg.flickerT=6;
         addFloat(pos.x,pos.y-SEG_R, b.isCrit?`💩${hitDmg}`:`${hitDmg}`, b.isCrit?'#ffcc00':'#ffffff');
+        if(!G._boneSfxThisWave){ G._boneSfxThisWave=true; playBoneSfx(); }
         if(seg.hp<=0){
           G.kills++;
           G.score+=Math.floor(si/5)+1;
@@ -1362,10 +1365,10 @@ function draw(){
   });
   if(G.running) drawPlayer();
   G.floatTexts.forEach(ft=>{
-    ctx.save();ctx.globalAlpha=ft.life/45;
-    ctx.font=`bold ${ft.txt.length>5?10:13}px 'Orbitron',monospace`;
+    ctx.save();ctx.globalAlpha=ft.life/30;
+    ctx.font=`bold ${ft.txt.length>5?9:12}px 'Orbitron',monospace`;
     ctx.textAlign='center';ctx.fillStyle=ft.col;
-    ctx.shadowColor=ft.col;ctx.shadowBlur=6;
+    ctx.shadowBlur=0;
     ctx.fillText(ft.txt,ft.x,ft.y);ctx.restore();
   });
   // Danger zone line
