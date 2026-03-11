@@ -117,7 +117,7 @@ transition:all .2s;-webkit-tap-highlight-color:transparent;}
 <body>
 <div id="wrap">
   <canvas id="c"></canvas>
-  <div id="hud">
+  <div id="hud"><span id="hudCoins" style="position:absolute;top:6px;right:14px;font-size:11px;color:#ffcc00;font-family:'Orbitron',monospace;letter-spacing:1px;">🪙 0</span>
     <div class="stat"><div class="slabel">SCORE</div><div class="sval" id="hScore" style="color:#00d4ff">0</div></div>
     <div class="stat"><div class="slabel">LIFE</div><div class="sval" id="hHp" style="color:#00ff88">100</div></div>
     <div class="stat"><div class="slabel">CATS</div><div class="sval" id="hKills" style="color:#cc44ff">0</div></div>
@@ -167,9 +167,24 @@ transition:all .2s;-webkit-tap-highlight-color:transparent;}
   <div class="dog-btns">
     <button class="dog-btn" id="dogYes" onclick="doRevive()">✅ 繼續戰鬥！</button>
     <button class="dog-btn" id="dogNo" onclick="noRevive()">❌ 回家睡覺</button>
+    <button class="dog-btn" style="background:linear-gradient(135deg,#1a3a00,#2a6000);border-color:#88ff44;color:#88ff44;" onclick="noRevive();setTimeout(openShop,100)">🏪 去商店</button>
   </div>
 </div>
 
+<div id="shopModal" style="display:none;position:fixed;inset:0;background:rgba(5,10,20,0.96);z-index:400;flex-direction:column;align-items:center;justify-content:center;">
+  <div style="background:#0a1828;border:2px solid #ffcc00;border-radius:18px;padding:24px 28px;min-width:300px;max-width:94vw;max-height:90vh;overflow-y:auto;color:#cce8ff;">
+    <div style="font-size:17px;color:#ffcc00;text-align:center;margin-bottom:6px;letter-spacing:2px;">🏪 武雄商店</div>
+    <div style="text-align:center;font-size:15px;color:#ffcc00;margin-bottom:14px;">🪙 <span id="shopCoins">0</span> 金幣</div>
+    <div style="display:flex;gap:8px;justify-content:center;margin-bottom:16px;">
+      <button id="tabUpgrade" onclick="switchShopTab('upgrade')" style="background:#1a3a60;border:2px solid #00d4ff;color:#00d4ff;padding:7px 18px;border-radius:20px;cursor:pointer;font-size:12px;">⚡ 升級</button>
+      <button id="tabSkin" onclick="switchShopTab('skin')" style="background:#0a1828;border:2px solid #444;color:#888;padding:7px 18px;border-radius:20px;cursor:pointer;font-size:12px;">🐾 皮膚</button>
+    </div>
+    <div id="shopItems" style="display:flex;flex-direction:column;gap:10px;"></div>
+    <div style="text-align:center;margin-top:18px;">
+      <button id="shopCloseBtn" style="background:transparent;border:2px solid #ffcc00;color:#ffcc00;padding:10px 28px;border-radius:20px;font-family:'Orbitron';cursor:pointer;font-size:13px;">✅ 出發！</button>
+    </div>
+  </div>
+</div>
 <div id="upgScreen">
   <div id="upgTitle">🎁 武雄升級！</div>
   <div id="upgSub">選擇一項升級</div>
@@ -187,10 +202,53 @@ transition:all .2s;-webkit-tap-highlight-color:transparent;}
   <div class="ov-s" style="font-size:10px;color:#223344;">
     📱 左右滑動移動角色 &nbsp;|&nbsp; 💻 A/D 或左右鍵移動
   </div>
-  <button class="ov-btn" onclick="startGame()">▶ 開始作戰</button>
+  <div id="ovSaveInfo" style="color:#ffcc00;font-size:12px;margin-bottom:12px;line-height:1.8;"></div><button class="ov-btn" onclick="openShop()">🏪 商店 / 開始</button><button class="ov-btn" style="font-size:13px;padding:10px 22px;margin-top:8px;" onclick="startGame()">▶ 直接開始</button>
 </div>
 
 <script>
+// ─── PERSISTENT SAVE ───
+const SAVE_KEY = 'woohson_save';
+function loadSave(){
+  try {
+    const d = JSON.parse(localStorage.getItem(SAVE_KEY)||'{}');
+    return {
+      coins:     d.coins     || 0,
+      bestScore: d.bestScore || 0,
+      bestWave:  d.bestWave  || 0,
+      activeSkin: d.activeSkin || 'default',
+      ownedSkins: d.ownedSkins || ['default'],
+      upgrades: {
+        dmg:         d.upgrades?.dmg         || 0,
+        fireRate:    d.upgrades?.fireRate     || 0,
+        startBullet: d.upgrades?.startBullet  || 0,
+        coinBonus:   d.upgrades?.coinBonus    || 0,
+      }
+    };
+  } catch(e){ return {coins:0,bestScore:0,bestWave:0,activeSkin:'default',ownedSkins:['default'],upgrades:{dmg:0,fireRate:0,startBullet:0,coinBonus:0}}; }
+}
+function persistSave(data){
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify(data)); } catch(e){}
+}
+let SAVE = loadSave();
+
+function applyPermanentUpgrades(p){
+  p.bulletDmg   = Math.round(22 * Math.pow(1.10, SAVE.upgrades.dmg));
+  p.fireRate    = Math.max(25, 55 - SAVE.upgrades.fireRate * 3);
+  p.bulletCount = Math.min(1 + SAVE.upgrades.startBullet, 4);
+}
+function earnCoins(n){
+  G.sessionCoins = (G.sessionCoins||0) + n;
+  const el = document.getElementById('hudCoins');
+  if(el) el.textContent = '🪙 '+(SAVE.coins + G.sessionCoins);
+}
+function commitSession(){
+  SAVE.coins += G.sessionCoins||0;
+  if(G.score > SAVE.bestScore) SAVE.bestScore = G.score;
+  if(SN.wave  > SAVE.bestWave)  SAVE.bestWave  = SN.wave;
+  G.sessionCoins = 0;
+  persistSave(SAVE);
+}
+
 // ═══════════════════════════════════════════════
 //  武雄歷險記 — 打貓大作戰
 // ═══════════════════════════════════════════════
@@ -466,9 +524,9 @@ function buildUpgradePool(){
   // Bullet damage +10%
   pool.push({
     id:'dmg', icon:'💥', name:'骨頭傷害 +50%',
-    desc:`傷害 ${Math.round(p.bulletDmg)} → ${Math.round(p.bulletDmg*1.5)}`,
+    desc:`傷害 ${Math.round(p.bulletDmg)} → ${Math.round(p.bulletDmg*1.1)}`,
     cls:'',
-    ap: ()=>{ p.bulletDmg = Math.round(p.bulletDmg * 1.5); }
+    ap: ()=>{ p.bulletDmg = Math.round(p.bulletDmg * 1.1); }
   });
 
   // Laser
@@ -482,9 +540,9 @@ function buildUpgradePool(){
   } else {
     pool.push({
       id:'laserdmg', icon:'💛', name:'撒尿強化：傷害',
-      desc:`撒尿傷害 ×1.5（目前 ${Math.round(p.laserDmgBase*p.laserDmgMult)}/s → ${Math.round(p.laserDmgBase*p.laserDmgMult*1.5)}/s）`,
+      desc:`撒尿傷害 ×1.1（目前 ${Math.round(p.laserDmgBase*p.laserDmgMult)}/s → ${Math.round(p.laserDmgBase*p.laserDmgMult*1.1)}/s）`,
       cls:'laser-card',
-      ap: ()=>{ p.laserDmgMult = parseFloat((p.laserDmgMult * 1.5).toFixed(3)); }
+      ap: ()=>{ p.laserDmgMult = parseFloat((p.laserDmgMult * 1.1).toFixed(3)); }
     });
     if(p.laserDur < p.laserMaxDur)
       pool.push({
@@ -513,9 +571,9 @@ function buildUpgradePool(){
       });
     pool.push({
       id:'firedmg', icon:'🌡️', name:'嘔吐傷害 +50%',
-      desc:`嘔吐腐蝕傷害提升至當前的1.5倍`,
+      desc:`嘔吐腐蝕傷害提升至當前的1.1倍`,
       cls:'fire-card',
-      ap: ()=>{ p.fireDmgMult = parseFloat((p.fireDmgMult * 1.5).toFixed(3)); }
+      ap: ()=>{ p.fireDmgMult = parseFloat((p.fireDmgMult * 1.1).toFixed(3)); }
     });
   }
 
@@ -555,9 +613,9 @@ function buildUpgradePool(){
   else
     pool.push({
       id:'bigbonedmg', icon:'💪', name:'大骨頭強化 +50%',
-      desc:`大骨頭傷害 +50%（目前 ${Math.round((20+p.bulletDmg*0.5)*p.bigBoneDmgMult)} → ${Math.round((20+p.bulletDmg*0.5)*p.bigBoneDmgMult*1.5)}）`,
+      desc:`大骨頭傷害 +10%（目前 ${Math.round((20+p.bulletDmg*0.5)*p.bigBoneDmgMult)} → ${Math.round((20+p.bulletDmg*0.5)*p.bigBoneDmgMult*1.1)}）`,
       cls:'',
-      ap: ()=>{ p.bigBoneDmgMult=parseFloat((p.bigBoneDmgMult*1.5).toFixed(3)); }
+      ap: ()=>{ p.bigBoneDmgMult=parseFloat((p.bigBoneDmgMult*1.1).toFixed(3)); }
     });
 
   // Shuffle and return 3
@@ -982,24 +1040,46 @@ function drawBg(){
 }
 
 // ─── DRAW PLAYER (武雄 cartoon dog) ───
+
+// ─── SKINS ───
+const SKINS = [
+  { id:'default', name:'原版武雄', body:'#cc8833', head:'#ddaa44', ear:'#bb7722', snout:'#eebb66', tail:'#cc8833', glow:'#ffcc44', price:0 },
+  { id:'fire',    name:'赤焰武雄', body:'#cc2200', head:'#ee3311', ear:'#aa1100', snout:'#ff6644', tail:'#cc2200', glow:'#ff4422', price:1500 },
+  { id:'ocean',   name:'深海武雄', body:'#1155cc', head:'#2277ee', ear:'#0044aa', snout:'#44aaff', tail:'#1155cc', glow:'#44aaff', price:1500 },
+  { id:'shadow',  name:'暗影武雄', body:'#333344', head:'#445566', ear:'#222233', snout:'#667788', tail:'#333344', glow:'#8899bb', price:1500 },
+  { id:'jade',    name:'翡翠武雄', body:'#117733', head:'#229944', ear:'#005522', snout:'#44cc77', tail:'#117733', glow:'#44ff88', price:1500 },
+  { id:'aurora',  name:'極光武雄', body:'#661188', head:'#8822aa', ear:'#550077', snout:'#bb44dd', tail:'#661188', glow:'#cc44ff', price:1500 },
+];
+function getActiveSkin(){
+  try {
+    const id = (SAVE && SAVE.activeSkin) ? SAVE.activeSkin : 'default';
+    return SKINS.find(s=>s.id===id) || SKINS[0];
+  } catch(e){ return SKINS[0]; }
+}
 function drawDog(cx, cy, r){
-  ctx.save(); ctx.translate(cx, cy);
+  let sk;
+  try { sk = getActiveSkin(); } catch(e){}
+  if(!sk) sk = { body:'#cc8833', head:'#ddaa44', ear:'#bb7722', snout:'#eebb66', tail:'#cc8833', glow:'#ffcc44' };
+  ctx.save();
+  ctx.globalAlpha = 1;
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.translate(cx, cy);
   const s = r/22;
-  ctx.shadowColor='#ffcc44'; ctx.shadowBlur=16;
+  ctx.shadowColor=sk.glow; ctx.shadowBlur=16;
   // Body
   ctx.beginPath(); ctx.ellipse(0,4*s,14*s,11*s,0,0,Math.PI*2);
-  ctx.fillStyle='#cc8833'; ctx.fill();
+  ctx.fillStyle=sk.body; ctx.fill();
   // Head
   ctx.beginPath(); ctx.arc(0,-8*s,13*s,0,Math.PI*2);
-  ctx.fillStyle='#ddaa44'; ctx.fill();
+  ctx.fillStyle=sk.head; ctx.fill();
   ctx.shadowBlur=0;
   // Floppy ears
-  ctx.fillStyle='#bb7722';
+  ctx.fillStyle=sk.ear;
   ctx.beginPath(); ctx.ellipse(-11*s,-10*s,5*s,8*s,-0.4,0,Math.PI*2); ctx.fill();
   ctx.beginPath(); ctx.ellipse( 11*s,-10*s,5*s,8*s, 0.4,0,Math.PI*2); ctx.fill();
   // Snout
   ctx.beginPath(); ctx.ellipse(0,-5*s,7*s,5*s,0,0,Math.PI*2);
-  ctx.fillStyle='#eebb66'; ctx.fill();
+  ctx.fillStyle=sk.snout; ctx.fill();
   // Nose
   ctx.beginPath(); ctx.ellipse(0,-7*s,3*s,2*s,0,0,Math.PI*2);
   ctx.fillStyle='#331100'; ctx.fill();
@@ -1016,7 +1096,7 @@ function drawDog(cx, cy, r){
   ctx.beginPath(); ctx.moveTo(-3*s,-3*s); ctx.quadraticCurveTo(0,-1*s,3*s,-3*s); ctx.stroke();
   // Wagging tail
   const wag=Math.sin(Date.now()*0.008)*0.4;
-  ctx.strokeStyle='#cc8833'; ctx.lineWidth=3*s;
+  ctx.strokeStyle=sk.tail; ctx.lineWidth=3*s;
   ctx.beginPath(); ctx.moveTo(12*s,4*s);
   ctx.quadraticCurveTo(18*s+wag*6,-2*s,16*s+wag*10,-8*s); ctx.stroke();
   ctx.restore();
@@ -1227,6 +1307,7 @@ function update(){
         playBoneSfx();
         if(seg.hp<=0){
           G.kills++;
+          earnCoins(1 + (SAVE.upgrades.coinBonus||0));
           G.score+=Math.floor(si/5)+1;
           spawnParts(pos.x,pos.y,'#ff3355',10);
           if(seg.isChest) G.chests.push({x:pos.x,y:pos.y,r:14,life:500,pulseT:0});
@@ -1293,6 +1374,7 @@ function update(){
 
   if(p.hp<=0 && G.running){
     G.running=false;
+    commitSession();
     setTimeout(()=>{
       if(!G.reviveUsed){
         document.getElementById('dogDeath').style.display='flex';
@@ -1394,6 +1476,151 @@ function draw(){
   ctx.setLineDash([]);ctx.restore();
 }
 
+
+// ─── SHOP ───
+const SHOP_ITEMS = [
+  { id:'dmg',         icon:'💥', name:'武雄健身',   desc:'基礎傷害 +10%',          cost: lvl => 30 + lvl*25,  max:10 },
+  { id:'fireRate',    icon:'⚡', name:'武雄加速',   desc:'射擊冷卻 -3 幀',          cost: lvl => 40 + lvl*30,  max:10 },
+  { id:'startBullet', icon:'🦴', name:'多帶骨頭',   desc:'開場骨頭數 +1（上限+3）', cost: lvl => 80 + lvl*60,  max:3  },
+  { id:'coinBonus',   icon:'🪙', name:'武雄打工',   desc:'每隻貓多掉 1 金幣',       cost: lvl => 60 + lvl*50,  max:5  },
+];
+
+
+let _shopTab = 'upgrade';
+function switchShopTab(tab){
+  _shopTab = tab;
+  document.getElementById('tabUpgrade').style.background = tab==='upgrade'?'#1a3a60':'#0a1828';
+  document.getElementById('tabUpgrade').style.borderColor = tab==='upgrade'?'#00d4ff':'#444';
+  document.getElementById('tabUpgrade').style.color = tab==='upgrade'?'#00d4ff':'#888';
+  document.getElementById('tabSkin').style.background = tab==='skin'?'#2a1a60':'#0a1828';
+  document.getElementById('tabSkin').style.borderColor = tab==='skin'?'#cc44ff':'#444';
+  document.getElementById('tabSkin').style.color = tab==='skin'?'#cc44ff':'#888';
+  renderShopTab();
+}
+function renderShopTab(){
+  const container = document.getElementById('shopItems');
+  container.innerHTML = '';
+  if(_shopTab === 'upgrade'){
+    SHOP_ITEMS.forEach(item => {
+      const lvl = SAVE.upgrades[item.id] || 0;
+      const cost = item.cost(lvl);
+      const maxed = lvl >= item.max;
+      const canAfford = SAVE.coins >= cost;
+      const div = document.createElement('div');
+      div.style.cssText = 'display:flex;align-items:center;gap:12px;background:#0d2040;border:1px solid #1a3a6a;border-radius:10px;padding:10px 14px;';
+      div.innerHTML = `
+        <span style="font-size:22px">${item.icon}</span>
+        <div style="flex:1">
+          <div style="font-size:13px;color:#e0f0ff;font-weight:bold;">${item.name} <span style="color:#aaa;font-size:10px;">Lv ${lvl}/${item.max}</span></div>
+          <div style="font-size:11px;color:#88aacc;">${item.desc}</div>
+        </div>
+        <button onclick="buyUpgrade('${item.id}')" ${maxed||!canAfford?'disabled':''} style="background:${maxed?'#333':canAfford?'#1a4a10':'#2a1a00'};border:1px solid ${maxed?'#555':canAfford?'#44cc00':'#aa4400'};color:${maxed?'#666':canAfford?'#88ff44':'#ff8844'};padding:6px 12px;border-radius:8px;cursor:${maxed||!canAfford?'default':'pointer'};font-size:11px;white-space:nowrap;">
+          ${maxed ? '已滿級' : '🪙 '+cost}
+        </button>`;
+      container.appendChild(div);
+    });
+  } else {
+    // Skin tab
+    const owned = SAVE.ownedSkins || ['default'];
+    const active = SAVE.activeSkin || 'default';
+    SKINS.forEach(sk => {
+      const isOwned = owned.includes(sk.id);
+      const isActive = active === sk.id;
+      const canAfford = SAVE.coins >= sk.price;
+      const div = document.createElement('div');
+      div.style.cssText = `display:flex;align-items:center;gap:12px;background:#0d2040;border:2px solid ${isActive?sk.glow:'#1a3a6a'};border-radius:10px;padding:10px 14px;`;
+      // Mini dog preview (canvas)
+      const previewId = 'skinPrev_'+sk.id;
+      let btn = '';
+      if(sk.price === 0 || isOwned){
+        btn = isActive
+          ? `<button disabled style="background:#1a3a00;border:1px solid #44cc00;color:#44cc00;padding:6px 12px;border-radius:8px;font-size:11px;">✅ 使用中</button>`
+          : `<button onclick="equipSkin('${sk.id}')" style="background:#0d2040;border:1px solid #00d4ff;color:#00d4ff;padding:6px 12px;border-radius:8px;cursor:pointer;font-size:11px;">裝備</button>`;
+      } else {
+        btn = `<button onclick="buySkin('${sk.id}')" ${!canAfford?'disabled':''} style="background:${canAfford?'#2a1a00':'#1a1a1a'};border:1px solid ${canAfford?'#ffcc00':'#555'};color:${canAfford?'#ffcc00':'#666'};padding:6px 12px;border-radius:8px;cursor:${canAfford?'pointer':'default'};font-size:11px;white-space:nowrap;">🪙 ${sk.price}</button>`;
+      }
+      div.innerHTML = `
+        <canvas id="${previewId}" width="40" height="44" style="border-radius:6px;background:#081520;"></canvas>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:bold;" id="skname_${sk.id}">${sk.name}</div>
+          <div style="font-size:11px;color:#888;">${sk.price===0?'預設':'🪙 '+sk.price}</div>
+        </div>
+        ${btn}`;
+      container.appendChild(div);
+      // Draw mini dog preview after render
+      requestAnimationFrame(()=>{
+        const cv = document.getElementById(previewId);
+        if(!cv) return;
+        const c2 = cv.getContext('2d');
+        c2.clearRect(0,0,40,44);
+        // Draw mini dog using skin colors
+        const s = 20/22;
+        c2.save(); c2.translate(20, 28);
+        c2.shadowColor=sk.glow; c2.shadowBlur=8;
+        c2.beginPath(); c2.ellipse(0,4*s,14*s,11*s,0,0,Math.PI*2); c2.fillStyle=sk.body; c2.fill();
+        c2.beginPath(); c2.arc(0,-8*s,13*s,0,Math.PI*2); c2.fillStyle=sk.head; c2.fill();
+        c2.shadowBlur=0;
+        c2.fillStyle=sk.ear;
+        c2.beginPath(); c2.ellipse(-11*s,-10*s,5*s,8*s,-0.4,0,Math.PI*2); c2.fill();
+        c2.beginPath(); c2.ellipse(11*s,-10*s,5*s,8*s,0.4,0,Math.PI*2); c2.fill();
+        c2.beginPath(); c2.ellipse(0,-5*s,7*s,5*s,0,0,Math.PI*2); c2.fillStyle=sk.snout; c2.fill();
+        c2.beginPath(); c2.ellipse(0,-7*s,3*s,2*s,0,0,Math.PI*2); c2.fillStyle='#331100'; c2.fill();
+        c2.fillStyle='#221100';
+        c2.beginPath(); c2.arc(-5*s,-11*s,2.5*s,0,Math.PI*2); c2.fill();
+        c2.beginPath(); c2.arc(5*s,-11*s,2.5*s,0,Math.PI*2); c2.fill();
+        c2.fillStyle='#fff';
+        c2.beginPath(); c2.arc(-4*s,-12*s,s,0,Math.PI*2); c2.fill();
+        c2.beginPath(); c2.arc(6*s,-12*s,s,0,Math.PI*2); c2.fill();
+        c2.restore();
+      });
+    });
+  }
+}
+
+function buySkin(id){
+  const sk = SKINS.find(s=>s.id===id);
+  if(!sk || SAVE.coins < sk.price) return;
+  SAVE.coins -= sk.price;
+  if(!SAVE.ownedSkins) SAVE.ownedSkins = ['default'];
+  SAVE.ownedSkins.push(id);
+  SAVE.activeSkin = id;
+  persistSave(SAVE);
+  document.getElementById('shopCoins').textContent = SAVE.coins;
+  renderShopTab();
+}
+function equipSkin(id){
+  SAVE.activeSkin = id;
+  persistSave(SAVE);
+  renderShopTab();
+}
+
+function openShop(){
+  SAVE = loadSave();
+  _shopTab = 'upgrade';
+  document.getElementById('shopCoins').textContent = SAVE.coins;
+  switchShopTab('upgrade');
+  document.getElementById('shopModal').style.display='flex';
+}
+
+function buyUpgrade(id){
+  const item = SHOP_ITEMS.find(i=>i.id===id);
+  if(!item) return;
+  const lvl = SAVE.upgrades[id]||0;
+  const cost = item.cost(lvl);
+  if(SAVE.coins < cost || lvl >= item.max) return;
+  SAVE.coins -= cost;
+  SAVE.upgrades[id] = lvl + 1;
+  persistSave(SAVE);
+  document.getElementById('shopCoins').textContent = SAVE.coins;
+  renderShopTab();
+}
+
+function closeShop(){
+  document.getElementById('shopModal').style.display='none';
+  startGame();
+}
+document.getElementById('shopCloseBtn').addEventListener('click', closeShop);
+
 // ─── GAME CONTROL ───
 function updatePauseModal(){
   const p = G.player;
@@ -1454,6 +1681,7 @@ function startGame(){
   unlockAudio();
   started=true; resize(); buildPath();
   resetG();
+  applyPermanentUpgrades(G.player);
   G.player.x=W/2; G.player.y=H-70;
   snInit();
   document.getElementById('overlay').style.display='none';
@@ -1466,11 +1694,22 @@ function showGameOver(){
   const ov=document.getElementById('overlay');
   ov.innerHTML=`
     <div class="ov-t" style="color:#ff3355;text-shadow:0 0 28px #ff3355">💀 武雄回家了</div>
-    <div class="ov-stats">Wave：${SN.wave}<br>打倒貓咪：${G.kills}<br>分數：${G.score}</div>
-    <button class="ov-btn" onclick="startGame()">↺ 再次出發！</button>`;
+    <div class="ov-stats">Wave：${SN.wave}<br>打倒貓咪：${G.kills}<br>分數：${G.score}<br><span style="color:#ffcc00">🪙 本局獲得 ${G.sessionCoins||0} 金幣 ／ 累計 ${SAVE.coins}</span></div>
+    <button class="ov-btn" onclick="openShop()">🏪 進商店</button>
+    <button class="ov-btn" style="font-size:13px;padding:10px 22px;margin-top:8px;" onclick="startGame()">↺ 跳過直接出發</button>`;
   ov.style.display='flex';
 }
 
+// Show save info on start screen
+(function(){
+  const el = document.getElementById('ovSaveInfo');
+  if(el){
+    const s = loadSave();
+    el.innerHTML = s.bestScore>0
+      ? `🪙 金幣：${s.coins}　　最高分：${s.bestScore}　Wave：${s.bestWave}`
+      : '🐾 首次出發！打倒貓咪可獲得金幣';
+  }
+})();
 let loopStarted = false;
 let _lastT = 0, _accum = 0;
 const STEP_MS = 1000/60;
