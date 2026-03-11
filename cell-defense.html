@@ -179,12 +179,15 @@ const ctx    = canvas.getContext('2d');
 let W, H;
 
 function resize(){
-  W = canvas.width  = Math.min(window.innerWidth, 480);
-  H = canvas.height = window.innerHeight;
+  const vw = window.visualViewport ? window.visualViewport.width : window.innerWidth;
+  const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+  W = canvas.width  = Math.min(vw, 480);
+  H = canvas.height = vh;
   document.getElementById('wrap').style.width = W+'px';
   if(started) buildPath();
 }
 window.addEventListener('resize', resize);
+if(window.visualViewport) window.visualViewport.addEventListener('resize', resize);
 
 let SPD = 1;
 function setSPD(s){
@@ -872,10 +875,10 @@ function buildBgCache(){
 function drawBg(){
   if(!bgCache||bgCacheW!==W||bgCacheH!==H) buildBgCache();
   ctx.drawImage(bgCache,0,0);
-  // Stars (low frequency update via frame)
-  if(G.frame%2===0){
+  const frame = (G && G.frame) ? G.frame : 0;
+  if(frame%2===0){
     bgStars.forEach(s=>{
-      const fl=0.25+Math.sin(G.frame*0.025+s.b*8)*0.3;
+      const fl=0.25+Math.sin(frame*0.025+s.b*8)*0.3;
       ctx.beginPath();ctx.arc(s.x*W,s.y*H,s.r,0,Math.PI*2);
       ctx.fillStyle=`rgba(180,210,255,${fl*0.25})`; ctx.fill();
     });
@@ -993,6 +996,7 @@ function drawCatFace(cx, cy, r, fillCol, strokeCol){
 
 // ─── DRAW SNAKE ───
 function drawSnake(){
+  if(!SN || !SN.segs) return;
   const vis=[];
   for(let si=0;si<SN.segs.length;si++){
     const seg=SN.segs[si];
@@ -1208,6 +1212,7 @@ function update(){
 
 // ─── DRAW ───
 function draw(){
+  if(!G || !G.particles) return; // not initialized yet
   drawBg();
   G.particles.forEach(pt=>{
     ctx.save();ctx.globalAlpha=Math.min(pt.life/35,1);
@@ -1362,10 +1367,13 @@ function showGameOver(){
 
 function loop(){
   requestAnimationFrame(loop);
-  // Run update SPD times per frame so speed is real, not just faster cooldowns
-  const steps = SPD;
-  for(let i=0;i<steps;i++) update();
-  draw();
+  try {
+    const steps = SPD;
+    for(let i=0;i<steps;i++) update();
+    draw();
+  } catch(e) {
+    console.error('Loop error:', e);
+  }
 }
 resize();
 loop();
