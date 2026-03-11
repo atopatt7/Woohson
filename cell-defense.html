@@ -1,9 +1,10 @@
 <!DOCTYPE html>
+
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>cell-defense</title>
+<title>武雄歷險記</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
 *{margin:0;padding:0;box-sizing:border-box;touch-action:none;}
@@ -33,7 +34,7 @@ background:rgba(0,0,0,0.6);border:1px solid #1a2a3a;border-radius:8px;
 padding:5px 8px;z-index:20;pointer-events:all;}
 .spd-label{font-size:8px;color:#334455;letter-spacing:1px;}
 .spd-btn{background:rgba(0,212,255,0.07);border:1px solid rgba(0,212,255,0.2);
-color:#00d4ff;font-family:'Orbitron',monospace;font-size:10px;
+color:#00d4ff;font-family:‘Orbitron’,monospace;font-size:10px;
 padding:5px 10px;cursor:pointer;border-radius:4px;transition:all .15s;
 -webkit-tap-highlight-color:transparent;}
 .spd-btn.active,.spd-btn:hover{background:rgba(0,212,255,0.25);border-color:#00d4ff;}
@@ -55,7 +56,7 @@ text-shadow:0 0 20px #ffcc00;letter-spacing:3px;margin-bottom:4px;text-align:cen
 border-radius:10px;padding:14px 12px;width:clamp(130px,28vw,170px);
 cursor:pointer;transition:all .18s;text-align:center;position:relative;overflow:hidden;
 -webkit-tap-highlight-color:transparent;}
-.ucard::before{content:'';position:absolute;inset:0;
+.ucard::before{content:’’;position:absolute;inset:0;
 background:radial-gradient(circle at 50% 0%,rgba(0,212,255,0.1),transparent 70%);}
 .ucard:hover,.ucard:active{border-color:#00d4ff;box-shadow:0 0 22px rgba(0,212,255,0.4);transform:translateY(-3px);}
 .ucard.laser-card{border-color:#ff44ff;background:linear-gradient(135deg,#1a0028,#2a0040);}
@@ -80,14 +81,14 @@ text-shadow:0 0 28px #00d4ff;letter-spacing:4px;text-align:center;margin-bottom:
 text-align:center;line-height:2;margin-bottom:16px;padding:0 20px;}
 .ov-stats{font-size:13px;color:#7a9ab8;text-align:center;line-height:2.2;margin-bottom:16px;}
 .ov-btn{background:transparent;border:2px solid #00d4ff;color:#00d4ff;
-font-family:'Orbitron',monospace;font-size:clamp(11px,3vw,15px);letter-spacing:2px;
+font-family:‘Orbitron’,monospace;font-size:clamp(11px,3vw,15px);letter-spacing:2px;
 padding:13px 36px;cursor:pointer;border-radius:6px;transition:all .2s;
 -webkit-tap-highlight-color:transparent;}
 .ov-btn:hover,.ov-btn:active{background:#00d4ff;color:#000;box-shadow:0 0 22px rgba(0,212,255,0.5);}
 /* Pause button */
 #pauseBtn{position:absolute;top:8px;left:50%;transform:translateX(-50%);
 background:rgba(0,0,0,0.55);border:1px solid #334455;color:#556677;
-font-family:'Orbitron',monospace;font-size:9px;padding:4px 10px;
+font-family:‘Orbitron’,monospace;font-size:9px;padding:4px 10px;
 cursor:pointer;border-radius:5px;z-index:30;pointer-events:all;letter-spacing:1px;
 -webkit-tap-highlight-color:transparent;}
 #pauseBtn:hover{border-color:#00d4ff;color:#00d4ff;}
@@ -102,7 +103,7 @@ margin-bottom:16px;object-fit:cover;}
 text-shadow:0 0 24px #ff3355;letter-spacing:3px;margin-bottom:6px;text-align:center;}
 #dogSub{font-size:11px;color:#556677;margin-bottom:20px;text-align:center;letter-spacing:1px;}
 .dog-btn{background:transparent;border:2px solid currentColor;
-font-family:'Orbitron',monospace;font-size:12px;letter-spacing:2px;
+font-family:‘Orbitron’,monospace;font-size:12px;letter-spacing:2px;
 padding:11px 28px;cursor:pointer;border-radius:6px;margin:4px;
 transition:all .2s;-webkit-tap-highlight-color:transparent;}
 #dogYes{color:#00ff88;border-color:#00ff88;}
@@ -111,6 +112,7 @@ transition:all .2s;-webkit-tap-highlight-color:transparent;}
 #dogNo:hover,#dogNo:active{background:#ff3355;color:#fff;box-shadow:0 0 18px rgba(255,50,80,0.5);}
 .dog-btns{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;}
 </style>
+
 </head>
 <body>
 <div id="wrap">
@@ -134,6 +136,7 @@ transition:all .2s;-webkit-tap-highlight-color:transparent;}
     傷害：<span id="stDmg">22</span> &nbsp;撒尿：<span id="stLaser">無</span><br>
     嘔吐：<span id="stFire">無</span> &nbsp;分裂：<span id="stSplit">無</span><br>
     大骨頭：<span id="stBig">無</span><br>
+    拉翔：<span id="stCrit">無</span> &nbsp;拉翔：<span id="stCrit">無</span><br>
     拉翔：<span id="stCrit">無</span>
   </div>
 </div>
@@ -201,6 +204,7 @@ const ROW_H   = 50;
 const SEG_R   = 16;
 const SEG_GAP = SEG_R*2 + 3;
 const PATH_DEN= 3;
+// Chest interval: every 10 nodes for first 100, then every 20
 function chestInterval(gi){
   return gi < 100 ? 10 : 20;
 }
@@ -216,6 +220,7 @@ function buildPath(){
   pathPts = [];
   const rows = Math.ceil((H * 2.2) / ROW_H);
   const firstY = ROW_H * 0.6;
+  // Entry straight down
   for(let y = -SEG_R*3; y <= firstY; y += PATH_DEN)
     pathPts.push({x: W/2, y});
   for(let r = 0; r < rows; r++){
@@ -255,6 +260,12 @@ function pathPos(dist){
 }
 
 // ─── SNAKE ───
+// Each segment has a fixed `slot` (0=head, 1,2,3...).
+// headDist = arc distance of slot-0 along path.
+// Segment at slot i is at headDist - i*SEG_GAP.
+// When a segment dies, all slots above it shift so body stays connected
+// (head "retracts" by SEG_GAP for each dead segment that created a gap).
+
 let SN = {};
 
 function segHP(slot, wave){
@@ -266,10 +277,13 @@ function snInit(){
     headDist: 0,
     wave: 1,
     speed: 0.55,
+    // segments: array of live segment objects, index=slot (0=head)
+    // We always maintain a contiguous array — no gaps.
     segs: [],
-    totalEverSpawned: 0,
-    pendingSpawn: 0,
+    totalEverSpawned: 0,  // global index for HP/chest calc
+    pendingSpawn: 0,      // how many more to still add to tail
   };
+  // Pre-spawn first segments
   for(let i=0;i<60;i++) spawnTailSeg();
 }
 
@@ -277,7 +291,7 @@ function spawnTailSeg(){
   const gi = SN.totalEverSpawned;
   const hp = segHP(gi, SN.wave);
   SN.segs.push({
-    gi,
+    gi,          // global index (determines HP, chest)
     hp, maxHp: hp,
     dead: false,
     flickerT: 0,
@@ -287,12 +301,16 @@ function spawnTailSeg(){
 }
 
 function snUpdateFast(){
+  // Move head by SPD steps at once (avoids loop overhead at 3x speed)
   SN.headDist += SN.speed * SPD;
+  // Spawn segments as needed (same logic as snUpdate)
   const maxNeededSlot = Math.floor((SN.headDist + H*2) / SEG_GAP) + 10;
   while(SN.segs.length < maxNeededSlot){
     spawnTailSeg();
   }
+  // Flicker countdown (scale with SPD)
   SN.segs.forEach(s => { if(s.flickerT>0) s.flickerT = Math.max(0, s.flickerT - SPD); });
+  // Head past bottom → kill player
   const headPos = pathPos(SN.headDist);
   if(headPos.y > H + SEG_R*3){
     G.player.hp = 0;
@@ -307,24 +325,39 @@ function snUpdateFast(){
 function snUpdate(){
   const step = SN.speed;
   SN.headDist += step;
+
+  // Keep spawning tail segments so snake is always long enough
+  // We want at least enough segs to fill visible area + buffer
   const maxNeededSlot = Math.floor((SN.headDist + H*2) / SEG_GAP) + 10;
   while(SN.segs.length < maxNeededSlot){
     spawnTailSeg();
   }
+
+  // Update flicker
   SN.segs.forEach(s => { if(s.flickerT>0) s.flickerT--; });
+
+  // Check if head (slot 0) has gone past bottom → damage player
   const headPos = pathPos(SN.headDist);
   if(headPos.y > H + SEG_R*3){
     G.player.hp = 0;
     spawnParts(W/2, H-60, '#ff3355', 15);
     updateHUD();
+    // Remove head, next seg becomes head (retract by re-indexing)
     SN.segs.shift();
+    // Compensate headDist so new head stays in place
     SN.headDist -= SEG_GAP;
     if(SN.headDist < 0) SN.headDist = 0;
   }
 }
 
+// Called when segment at slot `slot` is killed.
+// All segments with slot <= that one (closer to head) retract by SEG_GAP each.
+// We implement this by reducing headDist by SEG_GAP * (slot+1)
+// so the head moves back enough to close the gap.
 function retractSnake(slot){
+  // Remove this segment from array
   SN.segs.splice(slot, 1);
+  // Pull head back by SEG_GAP to close the gap
   SN.headDist -= SEG_GAP;
   if(SN.headDist < 0) SN.headDist = 0;
 }
@@ -340,50 +373,53 @@ function resetG(){
     player:{
       x: 0, y: 0, r: 20,
       hp:1, maxHp:1, invincible:0,
-      moveDir: 0,
+      moveDir: 0,   // -1, 0, 1
       spd: 4,
+      // gun
       bulletCount: 1,
       burstCount:  1,
-      splitLevel:    0,
-      critLevel:     0,
-      critChance:    0.0,
-      critUpgCount:  0,
+      splitLevel:    0,     // 0=none, 1=has split
+      critLevel:     0,     // 0=locked, 1=unlocked
+      critChance:    0.0,   // 0.2 after unlock
+      critUpgCount:  0,     // 用力拉翔 taken (max 16)
       bigBoneLevel:  0,
       bigBoneDmgMult:1.0,
       fireRate:    55,
       fireCooldown:0,
       burstQueue:  0,
-      burstDelay:  8,
+      burstDelay:  12,
       burstTimer:  0,
       bulletDmg:   22,
       bulletSpd:   9,
-      laserLevel:  0,
-      laserDmgBase:20,
+      // laser
+      laserLevel:  0,   // 0=none, >0 = has laser
+      laserDmgBase:80,
       laserDmgMult:1,
-      laserDur:    1,
+      laserDur:    1,   // seconds active
       laserMaxDur: 10,
-      laserCooldown:20,
-      laserTimer:  0,
+      laserCooldown:20, // seconds
+      laserTimer:  0,   // frames until laser fires (0=ready)
       laserActive: false,
       laserActiveTimer:0,
-      fireLevel:   0,
+      // fire bullet
+      fireLevel:   0,   // 0=none
       fireDmgMult: 1.0,
-      fireRadius:  1.5,
+      fireRadius:  1.5, // in units of SEG_R, max 4.5
       fireMaxRadius:4.5,
-      fireCooldownMax: 600,
-      fireAutoTimer: 0,
+      fireCooldownMax: 600, // 10 seconds at 60fps
+      fireAutoTimer: 0,     // counts up; fires when >= fireCooldownMax
     },
     bullets:[],
-    fireBalls:[],
-    bigBones:[],
-    fireZones:[],
+    fireBalls:[],   // active fire-ball projectiles (before hitting)
+    bigBones:[],    // big bone projectiles
+    fireZones:[],   // active burning zones on ground
     particles:[],
     chests:[],
     floatTexts:[],
     upgradeQueue:0,
     reviveUsed: false,
     keys:{},
-    touchX: null,
+    touchX: null,   // for mobile drag
     frame:0,
     _bigBoneThisWave:false,
   };
@@ -393,6 +429,8 @@ function resetG(){
 function buildUpgradePool(){
   const p = G.player;
   const pool = [];
+
+  // Always available (capped at 10)
   if(p.bulletCount < 10)
     pool.push({
       id:'bullet', icon:'🦴', name:'增加骨頭',
@@ -400,21 +438,23 @@ function buildUpgradePool(){
       cls:'',
       ap: ()=>{ p.bulletCount = Math.min(p.bulletCount+1, 10); }
     });
-  if(p.burstCount < 10)
+  if(p.burstCount < 5)
     pool.push({
       id:'burst', icon:'🦴', name:'骨頭連發',
-      desc:'連發次數 +1（上限10）',
+      desc:'連發次數 +1（上限5）',
       cls:'',
-      ap: ()=>{ p.burstCount = Math.min(p.burstCount+1, 10); }
+      ap: ()=>{ p.burstCount = Math.min(p.burstCount+1, 5); }
     });
 
+  // Bullet damage +10%
   pool.push({
-    id:'dmg', icon:'💥', name:'骨頭傷害 +10%',
-    desc:`傷害 ${Math.round(p.bulletDmg)} → ${Math.round(p.bulletDmg*1.1)}`,
+    id:'dmg', icon:'💥', name:'骨頭傷害 +50%',
+    desc:`傷害 ${Math.round(p.bulletDmg)} → ${Math.round(p.bulletDmg*1.5)}`,
     cls:'',
-    ap: ()=>{ p.bulletDmg = Math.round(p.bulletDmg * 1.1); }
+    ap: ()=>{ p.bulletDmg = Math.round(p.bulletDmg * 1.5); }
   });
 
+  // Laser
   if(p.laserLevel === 0){
     pool.push({
       id:'laser', icon:'💛', name:'黃狗撒尿',
@@ -425,19 +465,20 @@ function buildUpgradePool(){
   } else {
     pool.push({
       id:'laserdmg', icon:'💛', name:'撒尿強化：傷害',
-      desc:'雷射傷害 ×2',
+      desc:`撒尿傷害 ×1.5（目前 ${Math.round(p.laserDmgBase*p.laserDmgMult)}/s → ${Math.round(p.laserDmgBase*p.laserDmgMult*1.5)}/s）`,
       cls:'laser-card',
-      ap: ()=>{ p.laserDmgMult = parseFloat((p.laserDmgMult * 1.1).toFixed(3)); }
+      ap: ()=>{ p.laserDmgMult = parseFloat((p.laserDmgMult * 1.5).toFixed(3)); }
     });
     if(p.laserDur < p.laserMaxDur)
       pool.push({
         id:'laserdur', icon:'⏱️', name:'撒尿強化：時長',
-        desc:`尿量延長 +1 秒（上限${p.laserMaxDur}秒）`,
+        desc:`持續時間 +1 秒（目前 ${p.laserDur}s，上限 ${p.laserMaxDur}s）`,
         cls:'laser-card',
         ap: ()=>{ p.laserDur = Math.min(p.laserDur+1, p.laserMaxDur); }
       });
   }
 
+  // Fire bullet
   if(p.fireLevel === 0){
     pool.push({
       id:'fire', icon:'🤢', name:'嘔吐攻擊',
@@ -449,26 +490,28 @@ function buildUpgradePool(){
     if(p.fireRadius < p.fireMaxRadius)
       pool.push({
         id:'firerad', icon:'🤮', name:'嘔吐範圍 +1',
-        desc:`嘔吐範圍擴大（目前 ${p.fireRadius.toFixed(1)}隻，上限${p.fireMaxRadius}隻）`,
+        desc:`嘔吐範圍擴大（目前 ${p.fireRadius.toFixed(1)} 格，上限 4.5 格）`,
         cls:'fire-card',
         ap: ()=>{ p.fireRadius = Math.min(p.fireRadius+1, p.fireMaxRadius); }
       });
     pool.push({
-      id:'firedmg', icon:'🌡️', name:'嘔吐傷害 ×1.1',
-      desc:`嘔吐腐蝕傷害提升10%`,
+      id:'firedmg', icon:'🌡️', name:'嘔吐傷害 +50%',
+      desc:`嘔吐腐蝕傷害提升至當前的1.5倍`,
       cls:'fire-card',
-      ap: ()=>{ p.fireDmgMult = parseFloat((p.fireDmgMult * 1.1).toFixed(3)); }
+      ap: ()=>{ p.fireDmgMult = parseFloat((p.fireDmgMult * 1.5).toFixed(3)); }
     });
   }
 
+  // Split bullet
   if(p.splitLevel === 0)
     pool.push({
       id:'split', icon:'🔀', name:'分裂骨頭',
-      desc:'骨頭首次擊中時分裂成3顆\n側骨頭傷害40%，穿透1次',
+      desc:'骨頭首次擊中時分裂為3顆\n側骨傷害為原始的40%，可穿透1次',
       cls:'',
       ap: ()=>{ p.splitLevel=1; }
     });
 
+  // 拉翔（爆擊）
   if(p.critLevel === 0)
     pool.push({
       id:'crit', icon:'💩', name:'拉翔',
@@ -479,26 +522,28 @@ function buildUpgradePool(){
   else if(p.critUpgCount < 16)
     pool.push({
       id:'critup', icon:'💩', name:'用力拉翔',
-      desc:`爆擊機率 +5%（目前${Math.round(p.critChance*100)}%，上限100%）`,
+      desc:`爆擊機率 +5%（目前 ${Math.round(p.critChance*100)}%，最多升16次）`,
       cls:'',
       ap: ()=>{ p.critUpgCount++; p.critChance=parseFloat(Math.min(1.0,p.critChance+0.05).toFixed(2)); }
     });
 
+  // 憋一波大的
   if(p.bigBoneLevel === 0)
     pool.push({
       id:'bigbone', icon:'🦴', name:'憋一波大的',
-      desc:'每波射擊3%機率發射大骨頭\n貫穿所有貓，傷害20+小骨頭50%',
+      desc:'每波射擊3%機率發射大骨頭\n貫穿所有貓咪，傷害=20+骨頭傷害×50%',
       cls:'',
       ap: ()=>{ p.bigBoneLevel=1; }
     });
   else
     pool.push({
-      id:'bigbonedmg', icon:'💪', name:'大骨頭強化',
-      desc:'大骨頭傷害 ×1.1',
+      id:'bigbonedmg', icon:'💪', name:'大骨頭強化 +50%',
+      desc:`大骨頭傷害 +50%（目前 ${Math.round((20+p.bulletDmg*0.5)*p.bigBoneDmgMult)} → ${Math.round((20+p.bulletDmg*0.5)*p.bigBoneDmgMult*1.5)}）`,
       cls:'',
-      ap: ()=>{ p.bigBoneDmgMult=parseFloat((p.bigBoneDmgMult*1.1).toFixed(3)); }
+      ap: ()=>{ p.bigBoneDmgMult=parseFloat((p.bigBoneDmgMult*1.5).toFixed(3)); }
     });
 
+  // Shuffle and return 3
   return pool.sort(()=>Math.random()-0.5).slice(0,3);
 }
 
@@ -507,7 +552,7 @@ function showUpgrade(){
   const scr = document.getElementById('upgScreen');
   const ce  = document.getElementById('upgCards');
   const ht  = document.getElementById('upgAllHint');
-  const opts= buildUpgradePool();
+  const opts= buildUpgradePool(); // already sliced to 3
   const isAll = Math.random()<0.10;
   ht.style.opacity = isAll?'1':'0';
   document.getElementById('upgSub').textContent = isAll
@@ -551,7 +596,8 @@ function updateStatPanel(){
   document.getElementById('stDmg').textContent=Math.round(p.bulletDmg);
   if(p.laserLevel>0){
     const dmg=Math.round(p.laserDmgBase*p.laserDmgMult);
-    document.getElementById('stLaser').textContent=`${dmg}/s × ${p.laserDur}s`;
+    const lCoolLeft=p.laserActive?'發射中！':p.laserTimer>0?`${Math.ceil(p.laserTimer/60)}s`:'就緒！';
+    document.getElementById('stLaser').textContent=`💛${dmg}/s×${p.laserDur}s ${lCoolLeft}`;
   } else {
     document.getElementById('stLaser').textContent='無';
   }
@@ -603,12 +649,14 @@ function triggerShoot(){
   if(G.player.burstQueue>0) return;
   G.player.burstQueue=G.player.burstCount;
   G.player.burstTimer=0;
+  playBoneSfx(); // 每波只播一次
 }
 
 function processBurst(){
   const p=G.player;
   if(p.burstQueue<=0) return;
   if(p.burstTimer>0){p.burstTimer--;return;}
+  // Spawn bulletCount bullets spread horizontally, all going straight up
   const spread=(p.bulletCount-1)*14;
   for(let i=0;i<p.bulletCount;i++){
     const ox = p.bulletCount>1 ? (-spread/2+i*(spread/(p.bulletCount-1))) : 0;
@@ -624,19 +672,21 @@ function processBurst(){
       hasSplit: false,
     });
   }
+  // Big bone: 3% chance per burst wave, max 1 per wave
   if(p.bigBoneLevel>0 && !G._bigBoneThisWave && Math.random()<0.03){
     G._bigBoneThisWave=true;
     const bigDmg=Math.round((20+p.bulletDmg*0.5)*p.bigBoneDmgMult);
     G.bigBones.push({
       x:p.x, y:p.y-p.r,
       vy:-7,
-      r: SEG_R*1.8,
+      r: SEG_R*1.8,  // visually large
       dmg:bigDmg,
       life:500,
     });
   }
   p.burstQueue--;
   p.burstTimer=p.burstDelay;
+  // Reset wave flag when burst queue finishes
   if(p.burstQueue===0) G._bigBoneThisWave=false;
 }
 
@@ -646,6 +696,7 @@ function updateBigBones(){
     const bb=G.bigBones[bi];
     bb.y+=bb.vy*SPD; bb.life-=SPD;
     if(bb.life<=0||bb.y<-60){G.bigBones.splice(bi,1);continue;}
+    // Hit ALL segments in vertical line (full pierce)
     for(let si=SN.segs.length-1;si>=0;si--){
       const seg=SN.segs[si];
       const d=SN.headDist-si*SEG_GAP;
@@ -684,13 +735,69 @@ function updateFireAuto(){
   }
 }
 
-// ─── LASER ───
+// ─── AUDIO ───
+const _ac = new (window.AudioContext || window.webkitAudioContext)();
+function playLaserSfx(){
+  try {
+    const ctx2 = _ac;
+    if(ctx2.state === 'suspended') ctx2.resume();
+    const t = ctx2.currentTime;
+    // 電流噪音層
+    const buf = ctx2.createBuffer(1, ctx2.sampleRate * 0.35, ctx2.sampleRate);
+    const data = buf.getChannelData(0);
+    for(let i=0; i<data.length; i++) data[i] = (Math.random()*2-1) * Math.pow(1 - i/data.length, 1.5);
+    const src = ctx2.createBufferSource();
+    src.buffer = buf;
+    // 帶通濾波：只保留中高頻「滋」聲
+    const bp = ctx2.createBiquadFilter();
+    bp.type = 'bandpass'; bp.frequency.value = 1800; bp.Q.value = 3;
+    // 音量包絡：快起慢衰
+    const gain = ctx2.createGain();
+    gain.gain.setValueAtTime(0, t);
+    gain.gain.linearRampToValueAtTime(0.55, t + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
+    src.connect(bp); bp.connect(gain); gain.connect(ctx2.destination);
+    src.start(t); src.stop(t + 0.36);
+    // 高頻掃頻層（滋滋感）
+    const osc = ctx2.createOscillator();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(900, t);
+    osc.frequency.exponentialRampToValueAtTime(200, t + 0.3);
+    const g2 = ctx2.createGain();
+    g2.gain.setValueAtTime(0.18, t);
+    g2.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+    osc.connect(g2); g2.connect(ctx2.destination);
+    osc.start(t); osc.stop(t + 0.31);
+  } catch(e){}
+}
+
+
+function playBoneSfx(){
+  const now = _ac.currentTime;
+  if(now - (_ac._lastBone||0) < 0.5) return; // 最多2次/秒
+  _ac._lastBone = now;
+  try {
+    if(_ac.state==='suspended') _ac.resume();
+    const t = now;
+    const osc = _ac.createOscillator();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(180, t);
+    osc.frequency.exponentialRampToValueAtTime(60, t + 0.08);
+    const gain = _ac.createGain();
+    gain.gain.setValueAtTime(0.4, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+    osc.connect(gain); gain.connect(_ac.destination);
+    osc.start(t); osc.stop(t + 0.1);
+  } catch(e){}
+}
+
 function updateLaser(){
   const p=G.player;
   if(p.laserLevel===0) return;
 
   if(p.laserActive){
     p.laserActiveTimer-=SPD;
+    // Deal damage each frame to all segs in line
     const dmgPerFrame = (p.laserDmgBase * p.laserDmgMult) / 60;
     for(let si=0;si<SN.segs.length;si++){
       const seg=SN.segs[si];
@@ -702,13 +809,13 @@ function updateLaser(){
         seg.hp -= dmgPerFrame;
         seg.flickerT=2;
         if(seg.hp<=0){
-          seg.dead=false;
+          seg.dead=false; // handled in retract
           G.kills++;
           G.score+=Math.floor(si/5)+1;
           spawnParts(pos.x,pos.y,'#ffee44',8);
           if(seg.isChest) G.chests.push({x:pos.x,y:pos.y,r:14,life:500,pulseT:0});
           retractSnake(si);
-          si--;
+          si--; // re-check index
         }
       }
     }
@@ -719,7 +826,9 @@ function updateLaser(){
   } else {
     if(p.laserTimer>0) p.laserTimer--;
     else {
+      // Fire laser!
       p.laserActive=true;
+      playLaserSfx();
       p.laserActiveTimer=p.laserDur*60;
     }
   }
@@ -733,6 +842,7 @@ function updateFireBalls(){
     const fb=G.fireBalls[fi];
     fb.y+=fb.vy*SPD; fb.life-=SPD;
     if(fb.life<=0||fb.y<-30){G.fireBalls.splice(fi,1);continue;}
+    // Hit first segment
     let hitSeg=false;
     for(let si=0;si<SN.segs.length;si++){
       const seg=SN.segs[si];
@@ -741,11 +851,12 @@ function updateFireBalls(){
       const pos=pathPos(d);
       const dx=fb.x-pos.x, dy=fb.y-pos.y;
       if(Math.sqrt(dx*dx+dy*dy)<fb.r+SEG_R){
-        const zoneR = p.fireRadius * SEG_R;
+        // Spawn fire zone at hit location
+        const zoneR = p.fireRadius * SEG_R; // radius in px
         G.fireZones.push({
           x:pos.x, y:pos.y,
           r: zoneR,
-          life: 180,
+          life: 180,   // 3 seconds at 60fps
           maxLife: 180,
           dmgMult: p.fireDmgMult,
           pulseT: 0,
@@ -759,11 +870,12 @@ function updateFireBalls(){
 }
 
 function updateFireZones(){
-  const dmgPerTick = 2;
+  const dmgPerTick = 2; // 2 dmg per tick (every 6 frames) = 20 dmg/sec base
   for(let zi=G.fireZones.length-1;zi>=0;zi--){
     const z=G.fireZones[zi];
     z.life-=SPD; z.pulseT+=0.12*SPD; z.dmgTick+=SPD;
     if(z.life<=0){G.fireZones.splice(zi,1);continue;}
+    // Deal damage every 6 frames (10× per second)
     if(z.dmgTick>=6){
       z.dmgTick=0;
       const tickDmg = dmgPerTick * z.dmgMult;
@@ -794,6 +906,7 @@ function updateFireZones(){
 document.addEventListener('keydown',e=>{if(G.keys) G.keys[e.key]=true;});
 document.addEventListener('keyup',  e=>{if(G.keys) G.keys[e.key]=false;});
 
+// Touch: drag to move player
 let touchStartX=null;
 canvas.addEventListener('touchstart',e=>{
   e.preventDefault();
@@ -821,6 +934,7 @@ function buildBgCache(){
   const grad=bc.createLinearGradient(0,0,0,H);
   grad.addColorStop(0,'#060d18'); grad.addColorStop(1,'#0a1525');
   bc.fillStyle=grad; bc.fillRect(0,0,W,H);
+  // Sparse grid
   bc.strokeStyle='rgba(0,212,255,0.022)'; bc.lineWidth=1;
   for(let x=0;x<W;x+=60){bc.beginPath();bc.moveTo(x,0);bc.lineTo(x,H);bc.stroke();}
   for(let y=0;y<H;y+=60){bc.beginPath();bc.moveTo(0,y);bc.lineTo(W,y);bc.stroke();}
@@ -843,26 +957,35 @@ function drawDog(cx, cy, r){
   ctx.save(); ctx.translate(cx, cy);
   const s = r/22;
   ctx.shadowColor='#ffcc44'; ctx.shadowBlur=16;
+  // Body
   ctx.beginPath(); ctx.ellipse(0,4*s,14*s,11*s,0,0,Math.PI*2);
   ctx.fillStyle='#cc8833'; ctx.fill();
+  // Head
   ctx.beginPath(); ctx.arc(0,-8*s,13*s,0,Math.PI*2);
   ctx.fillStyle='#ddaa44'; ctx.fill();
   ctx.shadowBlur=0;
+  // Floppy ears
   ctx.fillStyle='#bb7722';
   ctx.beginPath(); ctx.ellipse(-11*s,-10*s,5*s,8*s,-0.4,0,Math.PI*2); ctx.fill();
   ctx.beginPath(); ctx.ellipse( 11*s,-10*s,5*s,8*s, 0.4,0,Math.PI*2); ctx.fill();
+  // Snout
   ctx.beginPath(); ctx.ellipse(0,-5*s,7*s,5*s,0,0,Math.PI*2);
   ctx.fillStyle='#eebb66'; ctx.fill();
+  // Nose
   ctx.beginPath(); ctx.ellipse(0,-7*s,3*s,2*s,0,0,Math.PI*2);
   ctx.fillStyle='#331100'; ctx.fill();
+  // Eyes
   ctx.fillStyle='#221100';
   ctx.beginPath(); ctx.arc(-5*s,-11*s,2.5*s,0,Math.PI*2); ctx.fill();
   ctx.beginPath(); ctx.arc( 5*s,-11*s,2.5*s,0,Math.PI*2); ctx.fill();
+  // Eye shine
   ctx.fillStyle='#ffffff';
   ctx.beginPath(); ctx.arc(-4*s,-12*s,s,0,Math.PI*2); ctx.fill();
   ctx.beginPath(); ctx.arc( 6*s,-12*s,s,0,Math.PI*2); ctx.fill();
+  // Smile
   ctx.strokeStyle='#331100'; ctx.lineWidth=1.5*s; ctx.lineCap='round';
   ctx.beginPath(); ctx.moveTo(-3*s,-3*s); ctx.quadraticCurveTo(0,-1*s,3*s,-3*s); ctx.stroke();
+  // Wagging tail
   const wag=Math.sin(Date.now()*0.008)*0.4;
   ctx.strokeStyle='#cc8833'; ctx.lineWidth=3*s;
   ctx.beginPath(); ctx.moveTo(12*s,4*s);
@@ -874,6 +997,7 @@ function drawPlayer(){
   const p=G.player;
   if(p.invincible>0&&Math.floor(p.invincible/4)%2===0) return;
   drawDog(p.x, p.y, p.r);
+  // Yellow urine laser beam
   if(p.laserActive){
     const prog=1-p.laserActiveTimer/(p.laserDur*60);
     const alpha=0.85-prog*0.3;
@@ -890,9 +1014,12 @@ function drawPlayer(){
 
 // ─── DRAW HELPERS ───
 function drawBone(cx, cy, r, col){
+  // Horizontal bone: shaft + 4 end-knobs
   const sw=r*1.1, sh=r*0.28, kr=r*0.45;
   ctx.fillStyle=col;
+  // Shaft
   ctx.beginPath(); ctx.ellipse(cx,cy,sw,sh,0,0,Math.PI*2); ctx.fill();
+  // End knobs
   for(const [ex,ey] of [[-sw,-sh*0.5],[-sw,sh*0.5],[sw,-sh*0.5],[sw,sh*0.5]]){
     ctx.beginPath(); ctx.arc(cx+ex,cy+ey,kr,0,Math.PI*2); ctx.fill();
   }
@@ -901,23 +1028,30 @@ function drawBone(cx, cy, r, col){
 function drawCatFace(cx, cy, r, fillCol, strokeCol){
   ctx.save(); ctx.translate(cx,cy);
   const s=r/16;
+  // Head circle
   ctx.beginPath(); ctx.arc(0,0,r,0,Math.PI*2);
   ctx.fillStyle=fillCol; ctx.fill();
   ctx.strokeStyle=strokeCol; ctx.lineWidth=1.5; ctx.stroke();
+  // Ears (triangles)
   ctx.fillStyle=strokeCol;
   ctx.beginPath(); ctx.moveTo(-r*0.55,-r*0.7); ctx.lineTo(-r*0.2,-r*1.1); ctx.lineTo(0,-r*0.7); ctx.fill();
   ctx.beginPath(); ctx.moveTo( r*0.55,-r*0.7); ctx.lineTo( r*0.2,-r*1.1); ctx.lineTo(0,-r*0.7); ctx.fill();
+  // Inner ear
   ctx.fillStyle='rgba(255,160,180,0.5)';
   ctx.beginPath(); ctx.moveTo(-r*0.48,-r*0.72); ctx.lineTo(-r*0.24,-r*1.0); ctx.lineTo(-r*0.04,-r*0.72); ctx.fill();
   ctx.beginPath(); ctx.moveTo( r*0.48,-r*0.72); ctx.lineTo( r*0.24,-r*1.0); ctx.lineTo( r*0.04,-r*0.72); ctx.fill();
+  // Eyes (almond)
   ctx.fillStyle=strokeCol;
   ctx.beginPath(); ctx.ellipse(-r*0.35,-r*0.15,r*0.22,r*0.16,0,0,Math.PI*2); ctx.fill();
   ctx.beginPath(); ctx.ellipse( r*0.35,-r*0.15,r*0.22,r*0.16,0,0,Math.PI*2); ctx.fill();
+  // Eye shine
   ctx.fillStyle='#ffffffcc';
   ctx.beginPath(); ctx.arc(-r*0.31,-r*0.18,r*0.07,0,Math.PI*2); ctx.fill();
   ctx.beginPath(); ctx.arc( r*0.39,-r*0.18,r*0.07,0,Math.PI*2); ctx.fill();
+  // Nose (small triangle)
   ctx.fillStyle='#ff88aa';
   ctx.beginPath(); ctx.moveTo(0,r*0.12); ctx.lineTo(-r*0.1,r*0.22); ctx.lineTo(r*0.1,r*0.22); ctx.fill();
+  // Whiskers
   ctx.strokeStyle=strokeCol; ctx.lineWidth=0.8; ctx.globalAlpha=0.7;
   for(const [x1,y1,x2,y2] of [[-r*0.15,r*0.2,-r*0.75,r*0.1],[-r*0.15,r*0.25,-r*0.75,r*0.28],
                                 [ r*0.15,r*0.2, r*0.75,r*0.1],[ r*0.15,r*0.25, r*0.75,r*0.28]]){
@@ -936,14 +1070,16 @@ function drawSnake(){
     const d=SN.headDist-si*SEG_GAP;
     if(d<0) break;
     const pos=pathPos(d);
-    if(pos.y < -SEG_R*4) continue;
-    if(pos.y > H+SEG_R*4) continue;
+    if(pos.y < -SEG_R*4) continue;  // above screen, skip but keep going
+    if(pos.y > H+SEG_R*4) continue; // below screen, skip
     vis.push({seg,pos,si});
-    if(vis.length>200) break;
+    if(vis.length>200) break;        // hard cap for perf
   }
   if(!vis.length) return;
 
+  // Connectors (tail→head) — no shadow for perf
   ctx.save(); ctx.lineCap='round'; ctx.shadowBlur=0;
+  // Batch by similar color to reduce state changes
   for(let i=vis.length-1;i>=1;i--){
     const a=vis[i],b=vis[i-1];
     const t=Math.min(a.si/100,1);
@@ -954,11 +1090,13 @@ function drawSnake(){
   }
   ctx.restore();
 
+  // Cat faces
   for(let i=vis.length-1;i>=0;i--){
     const {seg,pos,si}=vis[i];
     const t=Math.min(si/100,1);
     const flicker=seg.flickerT>0;
     const isHead=(si===0);
+    // Color: chest=red, head=lighter, deeper=darker; flicker=white
     const rr=Math.round(220-t*60), gg=Math.round(140-t*100), bb=Math.round(50+t*80);
     let fillCol, strokeCol, glowCol;
     if(flicker){
@@ -975,6 +1113,7 @@ function drawSnake(){
     ctx.shadowBlur=seg.isChest?20:isHead?18:8;
     drawCatFace(pos.x, pos.y, SEG_R, fillCol, strokeCol);
     ctx.shadowBlur=0;
+    // HP text in center
     const pct=seg.hp/seg.maxHp;
     const hpCol=pct>0.6?'#fff':pct>0.3?'#ffdd44':'#ff4444';
     const hp=Math.ceil(seg.hp);
@@ -989,6 +1128,7 @@ function drawSnake(){
     ctx.shadowColor='#000'; ctx.shadowBlur=3;
     ctx.fillText(hpStr,0,2);
     ctx.restore();
+    // Chest indicator: red glow ring
     if(seg.isChest){
       ctx.save(); ctx.translate(pos.x,pos.y);
       ctx.beginPath(); ctx.arc(0,0,SEG_R+3,0,Math.PI*2);
@@ -1009,28 +1149,37 @@ function update(){
   G.frame++;
   const p=G.player;
 
+  // ── Player move ──
   let dx=0;
   if(G.keys['ArrowLeft']||G.keys['a']||G.keys['A']) dx=-1;
   if(G.keys['ArrowRight']||G.keys['d']||G.keys['D']) dx=1;
   if(dx!==0) p.x=Math.max(p.r,Math.min(W-p.r,p.x+dx*p.spd));
+  // (SPD handled by loop calling update() multiple times)
 
   if(p.invincible>0) p.invincible-=SPD;
 
+  // ── Snake (SPD steps) ──
   snUpdateFast();
 
+  // Wave up every 80 kills
   const newWave=1+Math.floor(G.kills/80);
   if(newWave>SN.wave){SN.wave=newWave;SN.speed=0.55+(SN.wave-1)*0.07;updateHUD();}
 
+  // ── Shoot (speed scales with SPD) ──
   if(p.fireCooldown>0) p.fireCooldown-=SPD;
   if(p.fireCooldown<=0&&SN.segs.length>0){triggerShoot();p.fireCooldown=p.fireRate;}
   processBurst();
 
+  // ── Laser ──
   updateLaser();
+
+  // ── Fire balls & big bones ──
   updateFireAuto();
   updateFireBalls();
   updateFireZones();
   updateBigBones();
 
+  // ── Bullet movement & hit ──
   for(let bi=G.bullets.length-1;bi>=0;bi--){
     const b=G.bullets[bi];
     b.x+=b.vx*SPD; b.y+=b.vy*SPD; b.life-=SPD;
@@ -1054,6 +1203,7 @@ function update(){
           retractSnake(si);
           si--;
         }
+        // Split bullet: on first hit, spawn 2 side bullets
         if(b.splitLevel>0 && !b.hasSplit){
           b.hasSplit=true;
           const ang30=30*Math.PI/180;
@@ -1070,12 +1220,14 @@ function update(){
             });
           }
         }
+        // Bullet removed after hit (no pierce)
         G.bullets.splice(bi,1);
         break;
       }
     }
   }
 
+  // ── Player-segment collision ──
   if(p.invincible<=0){
     for(let si=0;si<SN.segs.length;si++){
       const seg=SN.segs[si];
@@ -1091,6 +1243,7 @@ function update(){
     }
   }
 
+  // ── Chests ──
   G.chests=G.chests.filter(c=>{
     c.life-=SPD; c.pulseT+=0.09*SPD; c.y+=0.4*SPD;
     if(c.life<450){
@@ -1102,6 +1255,7 @@ function update(){
     return c.life>0;
   });
 
+  // ── Particles/floats ──
   G.particles.forEach(pt=>{pt.x+=pt.vx*SPD;pt.y+=pt.vy*SPD;pt.vy+=0.1*SPD;pt.life-=SPD;});
   G.particles=G.particles.filter(pt=>pt.life>0);
   G.floatTexts.forEach(ft=>{ft.y+=ft.vy*SPD;ft.life-=SPD;});
@@ -1122,7 +1276,7 @@ function update(){
 
 // ─── DRAW ───
 function draw(){
-  if(!G || !G.particles) return;
+  if(!G || !G.particles) return; // not initialized yet
   drawBg();
   G.particles.forEach(pt=>{
     ctx.save();ctx.globalAlpha=Math.min(pt.life/35,1);
@@ -1140,16 +1294,19 @@ function draw(){
   });
   drawSnake();
 
+  // Fire zones (under bullets, above snake overlay)
   G.fireZones.forEach(z=>{
     const alpha = Math.min(1, z.life/30) * (0.55+Math.sin(z.pulseT)*0.2);
     const rPulse = z.r*(1+Math.sin(z.pulseT*1.3)*0.06);
     ctx.save();
+    // Outer glow
     ctx.globalAlpha=alpha*0.35;
     ctx.beginPath();ctx.arc(z.x,z.y,rPulse*1.25,0,Math.PI*2);
     const outerGrad=ctx.createRadialGradient(z.x,z.y,0,z.x,z.y,rPulse*1.25);
     outerGrad.addColorStop(0,'rgba(80,220,60,0.7)');
     outerGrad.addColorStop(1,'rgba(30,160,0,0)');
     ctx.fillStyle=outerGrad; ctx.fill();
+    // Inner fire
     ctx.globalAlpha=alpha*0.7;
     ctx.beginPath();ctx.arc(z.x,z.y,rPulse,0,Math.PI*2);
     const inGrad=ctx.createRadialGradient(z.x,z.y,0,z.x,z.y,rPulse);
@@ -1157,15 +1314,18 @@ function draw(){
     inGrad.addColorStop(0.5,'rgba(80,200,40,0.7)');
     inGrad.addColorStop(1,'rgba(20,100,0,0.2)');
     ctx.fillStyle=inGrad; ctx.fill();
+    // Border
     ctx.globalAlpha=alpha*0.5;
     ctx.strokeStyle='#44cc00';ctx.lineWidth=1.5;
     ctx.beginPath();ctx.arc(z.x,z.y,rPulse,0,Math.PI*2);ctx.stroke();
     ctx.restore();
   });
 
+  // Fire balls in flight
   G.fireBalls.forEach(fb=>{
     ctx.save();ctx.translate(fb.x,fb.y);
     ctx.shadowColor='#44cc00';ctx.shadowBlur=18;
+    // Flame circle
     const grad=ctx.createRadialGradient(0,0,0,0,0,fb.r);
     grad.addColorStop(0,'rgba(200,255,100,1)');
     grad.addColorStop(0.5,'rgba(80,200,40,0.9)');
@@ -1174,6 +1334,7 @@ function draw(){
     ctx.fillStyle=grad;ctx.fill();
     ctx.restore();
   });
+  // Bullets → bones
   G.bullets.forEach(b=>{
     ctx.save(); ctx.translate(b.x,b.y);
     const isSplit=b.color==='#ffaa00';
@@ -1181,6 +1342,7 @@ function draw(){
     drawBone(0,0,b.r,isSplit?'#ffcc66':'#f0ead6');
     ctx.restore();
   });
+  // Big bones
   G.bigBones.forEach(bb=>{
     ctx.save(); ctx.translate(bb.x,bb.y);
     ctx.shadowColor='#ffcc00'; ctx.shadowBlur=22;
@@ -1195,6 +1357,7 @@ function draw(){
     ctx.shadowColor=ft.col;ctx.shadowBlur=6;
     ctx.fillText(ft.txt,ft.x,ft.y);ctx.restore();
   });
+  // Danger zone line
   ctx.save();
   ctx.strokeStyle='rgba(255,50,50,0.1)';ctx.lineWidth=1;ctx.setLineDash([6,10]);
   ctx.beginPath();ctx.moveTo(0,H-110);ctx.lineTo(W,H-110);ctx.stroke();
@@ -1216,6 +1379,7 @@ function doRevive(){
   G.reviveUsed = true;
   G.player.hp = 1;
   G.player.invincible = 120;
+  // Retract snake 50 nodes
   const retract = 50;
   const remove = Math.min(retract, SN.segs.length);
   SN.segs.splice(0, remove);
@@ -1239,9 +1403,8 @@ function startGame(){
   G.running=true;
   updateHUD(); updateStatPanel(); updateLaserBar();
   document.getElementById("pauseBtn").textContent="⏸ PAUSE";
-  if(!loopStarted){ loopStarted=true; requestAnimationFrame(loop); } // ★ 修正重點在這裡 ★
+  if(!loopStarted){ loopStarted=true; requestAnimationFrame(loop); }
 }
-
 function showGameOver(){
   const ov=document.getElementById('overlay');
   ov.innerHTML=`
@@ -1254,10 +1417,8 @@ function showGameOver(){
 let loopStarted = false;
 let _lastT = 0, _accum = 0;
 const STEP_MS = 1000/60;
-
 function loop(ts){
   requestAnimationFrame(loop);
-  if (!ts) ts = performance.now(); // 防呆機制，確保不會再度拿到 undefined 變數
   try {
     if(_lastT===0) _lastT=ts;
     const raw = Math.min(ts-_lastT, 80);
@@ -1276,5 +1437,6 @@ function loop(ts){
 }
 resize();
 </script>
+
 </body>
 </html>
