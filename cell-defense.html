@@ -1395,6 +1395,8 @@ function noRevive(){
 }
 
 function startGame(){
+  // Unlock AudioContext on first user gesture (required on iOS/Android)
+  if(_ac.state === 'suspended') _ac.resume();
   started=true; resize(); buildPath();
   resetG();
   G.player.x=W/2; G.player.y=H-70;
