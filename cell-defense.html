@@ -434,7 +434,7 @@ function calcMilestoneBaseHP(){
   const burstCount = p.burstCount    || 1;
   const laserDmg   = p.laserLevel  > 0 ? Math.round(p.laserDmgBase * p.laserDmgMult) : 0;
   const fireDmg    = p.fireLevel   > 0 ? Math.round(20 * p.fireDmgMult) : 0;
-  return bulletDmg * bulletCount * burstCount * 10 + laserDmg * 5 + fireDmg * 5;
+  return bulletDmg * bulletCount * burstCount * 3 + laserDmg * 5 + fireDmg * 5;
 }
 
 function segHP(slot, wave){
