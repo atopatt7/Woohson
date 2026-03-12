@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
@@ -13,95 +14,94 @@ html,body{width:100%;height:100%;background:#060d18;overflow:hidden;
 canvas{display:block;touch-action:none;}
 
 #hud{position:absolute;top:0;left:0;right:0;pointer-events:none;z-index:10;
-  display:flex;justify-content:space-between;align-items:center;
-  padding:8px 14px;
-  background:linear-gradient(180deg,rgba(0,0,0,0.82)0%,transparent 100%);}
+display:flex;justify-content:space-between;align-items:center;
+padding:8px 14px;
+background:linear-gradient(180deg,rgba(0,0,0,0.82)0%,transparent 100%);}
 .stat{display:flex;flex-direction:column;align-items:center;}
 .slabel{font-size:7px;color:#334455;letter-spacing:1px;}
 .sval{font-size:14px;font-weight:700;color:#e8f4ff;text-shadow:0 0 8px currentColor;min-width:40px;text-align:center;}
 #hpBar{display:none !important;position:absolute;top:46px;left:14px;right:14px;height:4px;
-  background:rgba(255,255,255,0.07);border-radius:3px;overflow:hidden;pointer-events:none;z-index:10;}
+background:rgba(255,255,255,0.07);border-radius:3px;overflow:hidden;pointer-events:none;z-index:10;}
 #hpFill{height:100%;background:#00ff88;box-shadow:0 0 8px #00ff88;transition:width .2s,background .3s;border-radius:3px;}
 
 /* laser cooldown bar */
 #fireBar{position:absolute;top:58px;left:14px;right:14px;height:3px;background:rgba(0,80,0,0.3);border-radius:3px;display:none;}
 #fireFill{height:100%;background:#44cc00;box-shadow:0 0 6px #44cc00;border-radius:3px;transition:width .1s;}
 #laserBar{position:absolute;top:54px;left:14px;right:14px;height:3px;
-  background:rgba(255,238,68,0.12);border-radius:3px;pointer-events:none;z-index:10;display:none;}
+background:rgba(255,238,68,0.12);border-radius:3px;pointer-events:none;z-index:10;display:none;}
 #laserFill{height:100%;background:#ffee44;box-shadow:0 0 6px #ffee44;border-radius:3px;transition:width .1s;}
 
 #spdPanel{position:absolute;bottom:10px;right:10px;display:flex;align-items:center;gap:5px;
-  background:rgba(0,0,0,0.6);border:1px solid #1a2a3a;border-radius:8px;
-  padding:5px 8px;z-index:20;pointer-events:all;}
+background:rgba(0,0,0,0.6);border:1px solid #1a2a3a;border-radius:8px;
+padding:5px 8px;z-index:20;pointer-events:all;}
 .spd-label{font-size:8px;color:#334455;letter-spacing:1px;}
 .spd-btn{background:rgba(0,212,255,0.07);border:1px solid rgba(0,212,255,0.2);
-  color:#00d4ff;font-family:'Orbitron',monospace;font-size:10px;
-  padding:5px 10px;cursor:pointer;border-radius:4px;transition:all .15s;
-  -webkit-tap-highlight-color:transparent;}
+color:#00d4ff;font-family:‘Orbitron’,monospace;font-size:10px;
+padding:5px 10px;cursor:pointer;border-radius:4px;transition:all .15s;
+-webkit-tap-highlight-color:transparent;}
 .spd-btn.active,.spd-btn:hover{background:rgba(0,212,255,0.25);border-color:#00d4ff;}
-
 
 /* ─── NAP SKILL BUTTON ─── */
 #napBtn{
-  position:absolute; bottom:10px; left:10px;
-  width:64px; height:64px;
-  border:2px solid #00d4ff;
-  border-radius:8px;
-  background:#0a1828;
-  cursor:pointer;
-  display:none;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  gap:2px;
-  user-select:none;
-  -webkit-user-select:none;
-  touch-action:manipulation;
-  overflow:hidden;
-  position:absolute;
+position:absolute; bottom:10px; left:10px;
+width:64px; height:64px;
+border:2px solid #00d4ff;
+border-radius:8px;
+background:#0a1828;
+cursor:pointer;
+display:none;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+gap:2px;
+user-select:none;
+-webkit-user-select:none;
+touch-action:manipulation;
+overflow:hidden;
+position:absolute;
 }
 #napBtn.ready{
-  border-color:#00d4ff;
-  box-shadow:0 0 12px rgba(0,212,255,0.4);
+border-color:#00d4ff;
+box-shadow:0 0 12px rgba(0,212,255,0.4);
 }
 #napBtn.cooldown{
-  border-color:#334455;
-  filter:grayscale(1) brightness(0.5);
-  box-shadow:none;
-  cursor:default;
+border-color:#334455;
+filter:grayscale(1) brightness(0.5);
+box-shadow:none;
+cursor:default;
 }
 #napIcon{ font-size:28px; line-height:1; }
-#napLabel{ font-size:8px; color:#00d4ff; font-family:'Orbitron',monospace; letter-spacing:1px; }
+#napLabel{ font-size:8px; color:#00d4ff; font-family:‘Orbitron’,monospace; letter-spacing:1px; }
 #napCooldownText{
-  position:absolute;
-  top:50%; left:50%;
-  transform:translate(-50%,-50%);
-  font-size:20px; font-weight:bold;
-  color:#ffffff;
-  font-family:'Orbitron',monospace;
-  text-shadow:0 0 8px #000;
-  pointer-events:none;
-  display:none;
+position:absolute;
+top:50%; left:50%;
+transform:translate(-50%,-50%);
+font-size:20px; font-weight:bold;
+color:#ffffff;
+font-family:‘Orbitron’,monospace;
+text-shadow:0 0 8px #000;
+pointer-events:none;
+display:none;
 }
 /* stat panel bottom-left */
 #statPanel{display:none !important;position:absolute;bottom:10px;left:10px;font-size:9px;color:#334466;
-  line-height:1.8;pointer-events:none;z-index:10;letter-spacing:1px;}
+line-height:1.8;pointer-events:none;z-index:10;letter-spacing:1px;}
 #statPanel span{color:#00aacc;}
 
 /* Upgrade */
 #upgScreen{position:fixed;inset:0;background:rgba(0,5,15,0.94);display:none;
-  flex-direction:column;align-items:center;justify-content:center;
-  z-index:100;}
+flex-direction:column;align-items:center;justify-content:center;
+z-index:100;}
 #upgTitle{font-size:clamp(16px,4vw,24px);font-weight:900;color:#ffcc00;
-  text-shadow:0 0 20px #ffcc00;letter-spacing:3px;margin-bottom:4px;text-align:center;}
+text-shadow:0 0 20px #ffcc00;letter-spacing:3px;margin-bottom:4px;text-align:center;}
 #upgSub{font-size:11px;color:#334455;letter-spacing:1px;margin-bottom:16px;text-align:center;}
 #upgCards{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;padding:0 12px;max-width:700px;}
 .ucard{background:linear-gradient(135deg,#0a1628,#0d1f3a);border:2px solid #00d4ff;
-  border-radius:10px;padding:14px 12px;width:clamp(130px,28vw,170px);
-  cursor:pointer;transition:all .18s;text-align:center;position:relative;overflow:hidden;
-  -webkit-tap-highlight-color:transparent;}
-.ucard::before{content:'';position:absolute;inset:0;
-  background:radial-gradient(circle at 50% 0%,rgba(0,212,255,0.1),transparent 70%);}
+border-radius:10px;padding:14px 12px;width:clamp(130px,28vw,170px);
+cursor:pointer;transition:all .18s;text-align:center;position:relative;overflow:hidden;
+-webkit-tap-highlight-color:transparent;}
+.ucard::before{content:’’;position:absolute;inset:0;
+background:radial-gradient(circle at 50% 0%,rgba(0,212,255,0.1),transparent 70%);}
 .ucard:hover,.ucard:active{border-color:#00d4ff;box-shadow:0 0 22px rgba(0,212,255,0.4);transform:translateY(-3px);}
 .ucard.laser-card{border-color:#ff44ff;background:linear-gradient(135deg,#1a0028,#2a0040);}
 .ucard.laser-card::before{background:radial-gradient(circle at 50% 0%,rgba(255,68,255,0.15),transparent 70%);}
@@ -118,43 +118,44 @@ canvas{display:block;touch-action:none;}
 
 /* Overlay */
 #overlay{position:fixed;inset:0;background:rgba(0,5,15,0.93);display:flex;
-  flex-direction:column;align-items:center;justify-content:center;z-index:200;}
+flex-direction:column;align-items:center;justify-content:center;z-index:200;}
 .ov-t{font-size:clamp(22px,6vw,42px);font-weight:900;color:#00d4ff;
-  text-shadow:0 0 28px #00d4ff;letter-spacing:4px;text-align:center;margin-bottom:10px;}
+text-shadow:0 0 28px #00d4ff;letter-spacing:4px;text-align:center;margin-bottom:10px;}
 .ov-s{font-size:clamp(10px,2.5vw,13px);color:#334455;letter-spacing:1px;
-  text-align:center;line-height:2;margin-bottom:16px;padding:0 20px;}
+text-align:center;line-height:2;margin-bottom:16px;padding:0 20px;}
 .ov-stats{font-size:13px;color:#7a9ab8;text-align:center;line-height:2.2;margin-bottom:16px;}
 .ov-btn{background:transparent;border:2px solid #00d4ff;color:#00d4ff;
-  font-family:'Orbitron',monospace;font-size:clamp(11px,3vw,15px);letter-spacing:2px;
-  padding:13px 36px;cursor:pointer;border-radius:6px;transition:all .2s;
-  -webkit-tap-highlight-color:transparent;}
+font-family:‘Orbitron’,monospace;font-size:clamp(11px,3vw,15px);letter-spacing:2px;
+padding:13px 36px;cursor:pointer;border-radius:6px;transition:all .2s;
+-webkit-tap-highlight-color:transparent;}
 .ov-btn:hover,.ov-btn:active{background:#00d4ff;color:#000;box-shadow:0 0 22px rgba(0,212,255,0.5);}
 /* Pause button */
 #pauseBtn{position:absolute;top:8px;left:50%;transform:translateX(-50%);
-  background:rgba(0,0,0,0.55);border:1px solid #334455;color:#556677;
-  font-family:'Orbitron',monospace;font-size:9px;padding:4px 10px;
-  cursor:pointer;border-radius:5px;z-index:30;pointer-events:all;letter-spacing:1px;
-  -webkit-tap-highlight-color:transparent;}
+background:rgba(0,0,0,0.55);border:1px solid #334455;color:#556677;
+font-family:‘Orbitron’,monospace;font-size:9px;padding:4px 10px;
+cursor:pointer;border-radius:5px;z-index:30;pointer-events:all;letter-spacing:1px;
+-webkit-tap-highlight-color:transparent;}
 #pauseBtn:hover{border-color:#00d4ff;color:#00d4ff;}
 /* Dog death screen */
 #dogDeath{position:fixed;inset:0;background:rgba(0,0,0,0.92);display:none;
-  flex-direction:column;align-items:center;justify-content:center;z-index:300;}
+flex-direction:column;align-items:center;justify-content:center;z-index:300;}
 #dogImg{width:min(80vw,340px);height:auto;border-radius:16px;
-  border:3px solid #ff3355;box-shadow:0 0 40px rgba(255,50,80,0.5);
-  margin-bottom:16px;object-fit:cover;}
+border:3px solid #ff3355;box-shadow:0 0 40px rgba(255,50,80,0.5);
+margin-bottom:16px;object-fit:cover;}
 #dogTitle{font-size:clamp(18px,5vw,28px);font-weight:900;color:#ff3355;
-  text-shadow:0 0 24px #ff3355;letter-spacing:3px;margin-bottom:6px;text-align:center;}
+text-shadow:0 0 24px #ff3355;letter-spacing:3px;margin-bottom:6px;text-align:center;}
 #dogSub{font-size:11px;color:#556677;margin-bottom:20px;text-align:center;letter-spacing:1px;}
 .dog-btn{background:transparent;border:2px solid currentColor;
-  font-family:'Orbitron',monospace;font-size:12px;letter-spacing:2px;
-  padding:11px 28px;cursor:pointer;border-radius:6px;margin:4px;
-  transition:all .2s;-webkit-tap-highlight-color:transparent;}
+font-family:‘Orbitron’,monospace;font-size:12px;letter-spacing:2px;
+padding:11px 28px;cursor:pointer;border-radius:6px;margin:4px;
+transition:all .2s;-webkit-tap-highlight-color:transparent;}
 #dogYes{color:#00ff88;border-color:#00ff88;}
 #dogYes:hover,#dogYes:active{background:#00ff88;color:#000;box-shadow:0 0 18px rgba(0,255,136,0.5);}
 #dogNo{color:#ff3355;border-color:#ff3355;}
 #dogNo:hover,#dogNo:active{background:#ff3355;color:#fff;box-shadow:0 0 18px rgba(255,50,80,0.5);}
 .dog-btns{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;}
 </style>
+
 </head>
 <body>
 <div id="wrap">
@@ -181,7 +182,6 @@ canvas{display:block;touch-action:none;}
     大骨頭：<span id="stBig">無</span> &nbsp;拉翔：<span id="stCrit">無</span>
   </div>
 </div>
-
 
 <div id="napBtn" class="ready" onclick="activateNap()" ontouchstart="activateNap()">
   <span id="napIcon">😴</span>
@@ -221,7 +221,7 @@ canvas{display:block;touch-action:none;}
       <tr><td style="color:#446688;">黃狗撒尿</td><td id="ps_laser" style="color:#ffee44;text-align:right;">無</td></tr>
       <tr><td style="color:#446688;">嘔吐攻擊</td><td id="ps_fire" style="color:#44cc00;text-align:right;">無</td></tr>
     </table>
-    <div style="text-align:center;margin-top:18px;">
+    <div style="text-align:center;margin-top:12px;flex-shrink:0;">
       <button onclick="togglePause()" style="background:transparent;border:2px solid #00d4ff;color:#00d4ff;padding:10px 32px;border-radius:20px;font-family:'Orbitron';cursor:pointer;font-size:14px;">▶ 繼續</button>
     </div>
   </div>
@@ -238,18 +238,24 @@ canvas{display:block;touch-action:none;}
   </div>
 </div>
 
-
-<div id="shopModal" style="display:none;position:fixed;inset:0;background:rgba(5,10,20,0.96);z-index:400;flex-direction:column;align-items:center;justify-content:center;">
-  <div style="background:#0a1828;border:2px solid #ffcc00;border-radius:18px;padding:24px 28px;min-width:300px;max-width:94vw;max-height:90vh;overflow-y:auto;color:#cce8ff;">
-    <div style="font-size:17px;color:#ffcc00;text-align:center;margin-bottom:6px;letter-spacing:2px;">🏪 武雄商店</div>
-    <div style="text-align:center;font-size:15px;color:#ffcc00;margin-bottom:14px;">🪙 <span id="shopCoins">0</span> 金幣</div>
-    <div style="display:flex;gap:8px;justify-content:center;margin-bottom:16px;">
-      <button id="tabUpgrade" onclick="switchShopTab('upgrade')" style="background:#1a3a60;border:2px solid #00d4ff;color:#00d4ff;padding:7px 18px;border-radius:20px;cursor:pointer;font-size:12px;">⚡ 升級</button>
-      <button id="tabSkin" onclick="switchShopTab('skin')" style="background:#0a1828;border:2px solid #444;color:#888;padding:7px 18px;border-radius:20px;cursor:pointer;font-size:12px;">🐾 皮膚</button>
-    </div>
-    <div id="shopItems" style="display:flex;flex-direction:column;gap:10px;"></div>
-    <div style="text-align:center;margin-top:18px;">
-      <button id="shopCloseBtn" style="background:transparent;border:2px solid #ffcc00;color:#ffcc00;padding:10px 28px;border-radius:20px;font-family:'Orbitron';cursor:pointer;font-size:13px;">✅ 出發！</button>
+<div id="shopModal" style="display:none;position:fixed;inset:0;background:rgba(5,10,20,0.96);z-index:400;overflow-y:scroll;-webkit-overflow-scrolling:touch;">
+  <div style="min-height:100%;display:flex;align-items:flex-start;justify-content:center;padding:5vh 4vw;box-sizing:border-box;">
+    <div style="width:100%;max-width:480px;background:#0a1828;border:2px solid #ffcc00;border-radius:18px;color:#cce8ff;overflow:hidden;">
+      <!-- 標題 sticky -->
+      <div style="position:sticky;top:0;background:#0a1828;z-index:10;padding:18px 20px 12px;border-bottom:1px solid #1a3a6a;">
+        <div style="font-size:17px;color:#ffcc00;text-align:center;margin-bottom:6px;letter-spacing:2px;">🏪 武雄商店</div>
+        <div style="text-align:center;font-size:15px;color:#ffcc00;margin-bottom:12px;">🪙 <span id="shopCoins">0</span> 金幣</div>
+        <div style="display:flex;gap:8px;justify-content:center;">
+          <button id="tabUpgrade" onclick="switchShopTab('upgrade')" style="background:#1a3a60;border:2px solid #00d4ff;color:#00d4ff;padding:7px 18px;border-radius:20px;cursor:pointer;font-size:12px;">⚡ 升級</button>
+          <button id="tabSkin" onclick="switchShopTab('skin')" style="background:#0a1828;border:2px solid #444;color:#888;padding:7px 18px;border-radius:20px;cursor:pointer;font-size:12px;">🐾 皮膚</button>
+        </div>
+      </div>
+      <!-- 商品列表 -->
+      <div id="shopItems" style="padding:12px 16px;display:flex;flex-direction:column;gap:10px;"></div>
+      <!-- 按鈕 sticky -->
+      <div style="position:sticky;bottom:0;background:#0a1828;z-index:10;padding:12px 20px 16px;border-top:1px solid #1a3a6a;text-align:center;">
+        <button id="shopCloseBtn" style="background:transparent;border:2px solid #ffcc00;color:#ffcc00;padding:10px 28px;border-radius:20px;font-family:'Orbitron';cursor:pointer;font-size:13px;">✅ 出發！</button>
+      </div>
     </div>
   </div>
 </div>
@@ -412,11 +418,28 @@ function pathPos(dist){
 
 let SN = {};
 
+// ─── 里程碑血量系統 ───
+// 第5波開始啟用：每5的倍數波第一隻重新定義基準
+// 之後每隻貓都是前一隻+5（跨波連續）
+let _milestoneActive = false; // 是否已進入里程碑模式
+let _lastSegHP = 0;           // 上一隻貓的血量
+
+function calcMilestoneBaseHP(){
+  const p = G.player;
+  const bulletDmg  = p.bulletDmg  || 0;
+  const laserDmg   = p.laserLevel  > 0 ? Math.round(p.laserDmgBase * p.laserDmgMult) : 0;
+  const fireDmg    = p.fireLevel   > 0 ? Math.round(20 * p.fireDmgMult) : 0;
+  const bigBoneDmg = p.bigBoneLevel > 0 ? Math.round((20 + bulletDmg * 0.5) * p.bigBoneDmgMult) : 0;
+  return bulletDmg * 2 + fireDmg * 2 + laserDmg * 3 + bigBoneDmg * 2;
+}
+
 function segHP(slot, wave){
-  return Math.round((30 + slot*5) * (1+(wave-1)*0.25));
+  return Math.round((30 + slot*5) * (1+(wave-1)*0.35));
 }
 
 function snInit(){
+  _milestoneActive = false;
+  _lastSegHP = 0;
   SN = {
     headDist: 0,
     wave: 1,
@@ -433,9 +456,17 @@ function snInit(){
 
 function spawnTailSeg(){
   const gi = SN.totalEverSpawned;
-  const hp = segHP(gi, SN.wave);
+  let hp;
+  if(_milestoneActive){
+    // 里程碑模式啟動後：每隻都是前一隻+5
+    hp = _lastSegHP + 5;
+  } else {
+    hp = segHP(gi, SN.wave);
+  }
+  hp = Math.max(hp, 10);
+  _lastSegHP = hp;
   SN.segs.push({
-    gi,          // global index (determines HP, chest)
+    gi,
     hp, maxHp: hp,
     dead: false,
     flickerT: 0,
@@ -597,9 +628,9 @@ function buildUpgradePool(){
   // Bullet damage +10%
   pool.push({
     id:'dmg', icon:'💥', name:'骨頭傷害 +50%',
-    desc:`傷害 ${Math.round(p.bulletDmg)} → ${Math.round(p.bulletDmg*1.1)}`,
+    desc:`傷害 ${Math.round(p.bulletDmg)} → ${Math.round(p.bulletDmg*1.07)}`,
     cls:'',
-    ap: ()=>{ p.bulletDmg = Math.round(p.bulletDmg * 1.1); }
+    ap: ()=>{ p.bulletDmg = Math.round(p.bulletDmg * 1.07); }
   });
 
   // Laser
@@ -613,9 +644,9 @@ function buildUpgradePool(){
   } else {
     pool.push({
       id:'laserdmg', icon:'💛', name:'撒尿強化：傷害',
-      desc:`撒尿傷害 ×1.1（目前 ${Math.round(p.laserDmgBase*p.laserDmgMult)}/s → ${Math.round(p.laserDmgBase*p.laserDmgMult*1.1)}/s）`,
+      desc:`撒尿傷害 ×1.07（目前 ${Math.round(p.laserDmgBase*p.laserDmgMult)}/s → ${Math.round(p.laserDmgBase*p.laserDmgMult*1.07)}/s）`,
       cls:'laser-card',
-      ap: ()=>{ p.laserDmgMult = parseFloat((p.laserDmgMult * 1.1).toFixed(3)); }
+      ap: ()=>{ p.laserDmgMult = parseFloat((p.laserDmgMult * 1.07).toFixed(3)); }
     });
     if(p.laserDur < p.laserMaxDur)
       pool.push({
@@ -644,9 +675,9 @@ function buildUpgradePool(){
       });
     pool.push({
       id:'firedmg', icon:'🌡️', name:'嘔吐傷害 +50%',
-      desc:`嘔吐傷害 ×1.15（目前 ${Math.round(20*p.fireDmgMult)}/s → ${Math.round(20*p.fireDmgMult*1.15)}/s）`,
+      desc:`嘔吐傷害 ×1.1（目前 ${Math.round(20*p.fireDmgMult)}/s → ${Math.round(20*p.fireDmgMult*1.1)}/s）`,
       cls:'fire-card',
-      ap: ()=>{ p.fireDmgMult = parseFloat((p.fireDmgMult * 1.15).toFixed(3)); }
+      ap: ()=>{ p.fireDmgMult = parseFloat((p.fireDmgMult * 1.1).toFixed(3)); }
     });
   }
 
@@ -686,9 +717,9 @@ function buildUpgradePool(){
   else
     pool.push({
       id:'bigbonedmg', icon:'💪', name:'大骨頭強化 +50%',
-      desc:`大骨頭傷害 +10%（目前 ${Math.round((20+p.bulletDmg*0.5)*p.bigBoneDmgMult)} → ${Math.round((20+p.bulletDmg*0.5)*p.bigBoneDmgMult*1.1)}）`,
+      desc:`大骨頭傷害 +7%（目前 ${Math.round((20+p.bulletDmg*0.5)*p.bigBoneDmgMult)} → ${Math.round((20+p.bulletDmg*0.5)*p.bigBoneDmgMult*1.07)}）`,
       cls:'',
-      ap: ()=>{ p.bigBoneDmgMult=parseFloat((p.bigBoneDmgMult*1.1).toFixed(3)); }
+      ap: ()=>{ p.bigBoneDmgMult=parseFloat((p.bigBoneDmgMult*1.07).toFixed(3)); }
     });
 
   // Shuffle and return 3
@@ -1394,7 +1425,16 @@ function update(){
 
   // Wave up every 80 kills
   const newWave=1+Math.floor(G.kills/80);
-  if(newWave>SN.wave){SN.wave=newWave;SN.speed=0.55+(SN.wave-1)*0.07;updateHUD();}
+  if(newWave>SN.wave){
+    SN.wave=newWave;
+    SN.speed=0.55+(SN.wave-1)*0.07;
+    if(SN.wave % 5 === 0){
+      // 5倍數波：重新定義基準，下一隻生成時用這個HP
+      _milestoneActive = true;
+      _lastSegHP = calcMilestoneBaseHP() - 5; // -5 讓第一隻生成時+5剛好等於基準
+    }
+    updateHUD();
+  }
 
   // ── Shoot (speed scales with SPD) ──
   if(p.fireCooldown>0) p.fireCooldown-=SPD;
@@ -1722,8 +1762,9 @@ function openShop(){
   SAVE = loadSave();
   _shopTab = 'upgrade';
   document.getElementById('shopCoins').textContent = SAVE.coins;
+  document.getElementById('shopModal').style.display='block';
+  document.getElementById('shopModal').scrollTop = 0;
   switchShopTab('upgrade');
-  document.getElementById('shopModal').style.display='flex';
 }
 
 function buyUpgrade(id){
@@ -1927,5 +1968,6 @@ function loop(ts){
 }
 resize();
 </script>
+
 </body>
 </html>
