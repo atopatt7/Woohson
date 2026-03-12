@@ -290,9 +290,10 @@ function loadSave(){
         fireRate:    d.upgrades?.fireRate     || 0,
         startBullet: d.upgrades?.startBullet  || 0,
         coinBonus:   d.upgrades?.coinBonus    || 0,
+        beer:        d.upgrades?.beer         || 0,
       }
     };
-  } catch(e){ return {coins:0,bestScore:0,bestWave:0,activeSkin:'default',ownedSkins:['default'],upgrades:{dmg:0,fireRate:0,startBullet:0,coinBonus:0}}; }
+  } catch(e){ return {coins:0,bestScore:0,bestWave:0,activeSkin:'default',ownedSkins:['default'],upgrades:{dmg:0,fireRate:0,startBullet:0,coinBonus:0,beer:0}}; }
 }
 function persistSave(data){
   try { localStorage.setItem(SAVE_KEY, JSON.stringify(data)); } catch(e){}
