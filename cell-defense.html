@@ -395,7 +395,7 @@ function pathPos(dist){
 let SN = {};
 
 function segHP(slot, wave){
-  return Math.round((30 + slot*5) * (1+(wave-1)*0.2));
+  return Math.round((30 + slot*5) * (1+(wave-1)*0.25));
 }
 
 function snInit(){
@@ -579,9 +579,9 @@ function buildUpgradePool(){
   // Bullet damage +10%
   pool.push({
     id:'dmg', icon:'💥', name:'骨頭傷害 +50%',
-    desc:`傷害 ${Math.round(p.bulletDmg)} → ${Math.round(p.bulletDmg*1.25)}`,
+    desc:`傷害 ${Math.round(p.bulletDmg)} → ${Math.round(p.bulletDmg*1.1)}`,
     cls:'',
-    ap: ()=>{ p.bulletDmg = Math.round(p.bulletDmg * 1.25); }
+    ap: ()=>{ p.bulletDmg = Math.round(p.bulletDmg * 1.1); }
   });
 
   // Laser
@@ -626,9 +626,9 @@ function buildUpgradePool(){
       });
     pool.push({
       id:'firedmg', icon:'🌡️', name:'嘔吐傷害 +50%',
-      desc:`嘔吐傷害 ×1.1（目前 ${Math.round(20*p.fireDmgMult)}/s → ${Math.round(20*p.fireDmgMult*1.1)}/s）`,
+      desc:`嘔吐傷害 ×1.15（目前 ${Math.round(20*p.fireDmgMult)}/s → ${Math.round(20*p.fireDmgMult*1.15)}/s）`,
       cls:'fire-card',
-      ap: ()=>{ p.fireDmgMult = parseFloat((p.fireDmgMult * 1.1).toFixed(3)); }
+      ap: ()=>{ p.fireDmgMult = parseFloat((p.fireDmgMult * 1.15).toFixed(3)); }
     });
   }
 
