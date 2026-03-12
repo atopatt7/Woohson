@@ -188,6 +188,24 @@ canvas{display:block;touch-action:none;}
   <span id="napLabel">午睡</span>
   <span id="napCooldownText"></span>
 </div>
+
+<div id="clearModal" style="display:none;position:fixed;inset:0;background:#000;z-index:500;flex-direction:column;align-items:center;justify-content:center;gap:0;">
+  <img src="https://i.postimg.cc/8cPBBdGt/IMG-7758.jpg"
+       style="max-width:100vw;max-height:60vh;object-fit:contain;display:block;"
+       crossorigin="anonymous" alt="clear"/>
+  <div style="color:#ffcc00;font-size:22px;font-weight:bold;text-align:center;
+              padding:18px 24px 8px;text-shadow:0 0 16px #ffcc00;line-height:1.7;
+              font-family:'Orbitron',monospace;letter-spacing:1px;">
+    好爽！好爽！謝謝你的付出
+  </div>
+  <button onclick="showStartScreen()"
+          style="margin-top:12px;background:transparent;border:2px solid #ffcc00;
+                 color:#ffcc00;padding:12px 36px;border-radius:24px;
+                 font-family:'Orbitron',monospace;font-size:14px;
+                 cursor:pointer;letter-spacing:2px;">
+    🏠 返回首頁
+  </button>
+</div>
 <button id="pauseBtn" onclick="togglePause()">⏸ PAUSE</button>
 
 <div id="pauseModal" style="display:none;position:fixed;inset:0;background:rgba(5,10,20,0.92);z-index:300;display:none;flex-direction:column;align-items:center;justify-content:center;">
@@ -854,6 +872,7 @@ function updateBigBones(){
         addFloat(pos.x,pos.y-SEG_R,'💥'+bb.dmg,'#ffcc00');
         if(seg.hp<=0){
           G.kills++;
+          checkClear();
           G.score+=Math.floor(si/5)+1;
           spawnParts(pos.x,pos.y,'#ffcc00',12);
           if(seg.isChest) G.chests.push({x:pos.x,y:pos.y,r:14,life:500,pulseT:0});
@@ -967,6 +986,7 @@ function updateLaser(){
         if(seg.hp<=0){
           seg.dead=false; // handled in retract
           G.kills++;
+          checkClear();
           G.score+=Math.floor(si/5)+1;
           spawnParts(pos.x,pos.y,'#ffee44',8);
           if(seg.isChest) G.chests.push({x:pos.x,y:pos.y,r:14,life:500,pulseT:0});
@@ -1046,6 +1066,7 @@ function updateFireZones(){
           seg.flickerT=3;
           if(seg.hp<=0){
             G.kills++;
+            checkClear();
             G.score+=Math.floor(si/5)+1;
             spawnParts(pos.x,pos.y,'#44cc00',8);
             if(seg.isChest) G.chests.push({x:pos.x,y:pos.y,r:14,life:500,pulseT:0});
@@ -1407,6 +1428,7 @@ function update(){
         playBoneSfx();
         if(seg.hp<=0){
           G.kills++;
+          checkClear();
           earnCoins(1 + (SAVE.upgrades.coinBonus||0));
           G.score+=Math.floor(si/5)+1;
           spawnParts(pos.x,pos.y,'#ff3355',10);
@@ -1830,6 +1852,36 @@ function startGame(){
   if(!loopStarted){ loopStarted=true; requestAnimationFrame(loop); }
 }
 showNapBtn(false);
+
+
+function checkClear(){
+  if(SN.wave >= 30 && G.kills >= 80*30){
+    showClear();
+  }
+}
+function showClear(){
+  G.running = false;
+  showNapBtn(false);
+  commitSession();
+  document.getElementById('clearModal').style.display='flex';
+}
+function showStartScreen(){
+  document.getElementById('clearModal').style.display='none';
+  document.getElementById('overlay').style.display='flex';
+  // Reset overlay to start screen
+  const ov = document.getElementById('overlay');
+  const s = loadSave();
+  const saveInfo = s.bestScore>0
+    ? `🪙 金幣：${s.coins}　　最高分：${s.bestScore}　Wave：${s.bestWave}`
+    : '🐾 首次出發！打倒貓咪可獲得金幣';
+  ov.innerHTML = `
+    <div class="ov-t" style="font-size:20px;letter-spacing:3px;">🐾 武雄歷險記</div>
+    <div class="ov-stats" id="ovSaveInfo">${saveInfo}</div>
+    <button class="ov-btn" onclick="openShop()">🏪 商店</button>
+    <button class="ov-btn" onclick="startGame()">▶ 出發！</button>`;
+  ov.style.display='flex';
+}
+
 function showGameOver(){
   const ov=document.getElementById('overlay');
   ov.innerHTML=`
